@@ -1,0 +1,282 @@
+
+
+if object_id('tempdb..#Temp') is not null  drop table #Temp
+select column_name,DATA_TYPE
+into #Temp from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='AMC_Sample_Data'
+
+select distinct DATA_TYPE from #Temp
+
+---------------------------------------------
+
+if object_id('tempdb..#Percentile_calc') is not null  drop table #Percentile_calc
+CREATE TABLE #Percentile_calc
+(
+Columnname varchar(200),
+Percentile_5 FLOAT,
+Percentile_95 FLOAT
+)
+    
+
+Declare @columnname varchar (200)
+
+DECLARE FETCH_CURSOR CURSOR FOR 
+SELECT column_name
+FROM #Temp 
+where DATA_TYPE in ('float')
+
+
+OPEN FETCH_CURSOR;
+
+FETCH NEXT FROM FETCH_CURSOR 
+INTO @columnname;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+print @columnname
+
+--5_percentile,95 percentile
+
+exec('insert into #Percentile_calc (Columnname,Percentile_5,Percentile_95)
+select distinct '''+@columnname+''',
+		(	(SELECT MAX(['+@columnname+']) FROM
+			(SELECT TOP 5 PERCENT ['+@columnname+'] FROM AMC_Sample_Data
+			 WHERE ['+@columnname+'] IS NOT NULL
+			 ORDER BY ['+@columnname+']) AS H1)
+		+
+			(SELECT MIN(['+@columnname+']) FROM
+			(SELECT TOP 95 PERCENT ['+@columnname+'] FROM AMC_Sample_Data 
+			 WHERE ['+@columnname+'] IS NOT NULL
+			 ORDER BY ['+@columnname+'] DESC) AS H2)
+	) / 2 AS P5,
+	(		(SELECT MAX(['+@columnname+']) FROM
+			(SELECT TOP 95 PERCENT ['+@columnname+'] FROM AMC_Sample_Data
+			 WHERE ['+@columnname+'] IS NOT NULL
+			 ORDER BY ['+@columnname+']) AS H1)
+		+
+			(SELECT MIN(['+@columnname+']) FROM
+			(SELECT TOP 5 PERCENT ['+@columnname+'] FROM AMC_Sample_Data 
+			 WHERE ['+@columnname+'] IS NOT NULL
+			 ORDER BY ['+@columnname+'] DESC) AS H2)
+	)	 / 2 AS P95')
+FETCH NEXT FROM FETCH_CURSOR 
+INTO @columnname;
+END
+deallocate FETCH_CURSOR
+
+-------------------------------
+
+
+select * from #Percentile_calc
+
+--------
+--outlier removal dataset creation 3 to 15 months
+
+if object_id('Ra_ICRA.dbo.3_15_ratios_outlier_rplcd')
+ is not null  drop table 3_15_ratios_outlier_rplcd
+ select * into 3_15_ratios_outlier_rplcd
+ from AMC_Sample_Data
+ order by Coded_Name,stmt_year
+--127744
+
+--------------------------------
+--5 percentile
+
+update 3_15_ratios_outlier_rplcd set Net_Sales_CPI_Currency_Adj='100890864.467126' where Net_Sales_CPI_Currency_Adj<'100890864.467126'
+update 3_15_ratios_outlier_rplcd set Log_Net_Sales='8.00385184323257' where Log_Net_Sales<'8.00385184323257'
+update 3_15_ratios_outlier_rplcd set Assets_CPI_Currency_Adj='111325028.099957' where Assets_CPI_Currency_Adj<'111325028.099957'
+update 3_15_ratios_outlier_rplcd set Log_Assets='8.04659281342513' where Log_Assets<'8.04659281342513'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_Ttl_Capitalization='0' where Ttl_Debt_to_Ttl_Capitalization<'0'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_Ttl_Assets='0' where Ttl_Debt_to_Ttl_Assets<'0'
+update 3_15_ratios_outlier_rplcd set LT_Debt_to_LT_Debt_NW='0' where LT_Debt_to_LT_Debt_NW<'0'
+update 3_15_ratios_outlier_rplcd set RE_to_Current_Liabilities='-2.52076154082364' where RE_to_Current_Liabilities<'-2.52076154082364'
+update 3_15_ratios_outlier_rplcd set Ttl_Equity_to_Ttl_Fixed_Assets='-0.0971837495253263' where Ttl_Equity_to_Ttl_Fixed_Assets<'-0.0971837495253263'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_Ttl_Equity='-1.03909217523424' where Ttl_Debt_to_Ttl_Equity<'-1.03909217523424'
+update 3_15_ratios_outlier_rplcd set Cash_Net_Sales='0.000278409354554313' where Cash_Net_Sales<'0.000278409354554313'
+update 3_15_ratios_outlier_rplcd set WC_Accruals_Current='-0.221728284818543' where WC_Accruals_Current<'-0.221728284818543'
+update 3_15_ratios_outlier_rplcd set WC_Accruals_Previous='-0.22016828839708' where WC_Accruals_Previous<'-0.22016828839708'
+update 3_15_ratios_outlier_rplcd set Change_WC_Accruals='-0.139967066482312' where Change_WC_Accruals<'-0.139967066482312'
+update 3_15_ratios_outlier_rplcd set Inventory_to_Sales='0' where Inventory_to_Sales<'0'
+update 3_15_ratios_outlier_rplcd set WC_to_Sales_Current='-0.0648911518402362' where WC_to_Sales_Current<'-0.0648911518402362'
+update 3_15_ratios_outlier_rplcd set WC_to_Sales_Previous='-0.0688355233348437' where WC_to_Sales_Previous<'-0.0688355233348437'
+update 3_15_ratios_outlier_rplcd set Change_WC_to_Sales='-0.0922386778673515' where Change_WC_to_Sales<'-0.0922386778673515'
+update 3_15_ratios_outlier_rplcd set Current_Liabilites_to_Sales='0.073401935909249' where Current_Liabilites_to_Sales<'0.073401935909249'
+update 3_15_ratios_outlier_rplcd set Accounts_Payable_Days='8.03864533554955' where Accounts_Payable_Days<'8.03864533554955'
+update 3_15_ratios_outlier_rplcd set Accounts_Receivable_Days='0' where Accounts_Receivable_Days<'0'
+update 3_15_ratios_outlier_rplcd set EBIT_to_Int_Exp='-3.11305035085344' where EBIT_to_Int_Exp<'-3.11305035085344'
+update 3_15_ratios_outlier_rplcd set EBITDA_Int_Exp='-0.167778836987607' where EBITDA_Int_Exp<'-0.167778836987607'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_EBITDA='0' where Ttl_Debt_to_EBITDA<'0'
+update 3_15_ratios_outlier_rplcd set EBITDA_Int_Tx_Div_CAPX_to_Tl_Dt='-3.11987709678918' where EBITDA_Int_Tx_Div_CAPX_to_Tl_Dt<'-3.11987709678918'
+update 3_15_ratios_outlier_rplcd set Retained_Cash_Flow_to_Ttl_Debt='-0.62327346542518' where Retained_Cash_Flow_to_Ttl_Debt<'-0.62327346542518'
+update 3_15_ratios_outlier_rplcd set OCF_to_Debt='-0.771760850451602' where OCF_to_Debt<'-0.771760850451602'
+update 3_15_ratios_outlier_rplcd set Cash_to_Current_Liabilities='0.00138440709712227' where Cash_to_Current_Liabilities<'0.00138440709712227'
+update 3_15_ratios_outlier_rplcd set Cash_to_Assests='0.00033026968879159' where Cash_to_Assests<'0.00033026968879159'
+update 3_15_ratios_outlier_rplcd set Quick_Ratio='0.122096219723654' where Quick_Ratio<'0.122096219723654'
+update 3_15_ratios_outlier_rplcd set Cash_to_Debt='0.000950275031523547' where Cash_to_Debt<'0.000950275031523547'
+update 3_15_ratios_outlier_rplcd set Change_WC_to_OCF='-2.51119125914925' where Change_WC_to_OCF<'-2.51119125914925'
+update 3_15_ratios_outlier_rplcd set Current_Ratio='0.504637189955323' where Current_Ratio<'0.504637189955323'
+update 3_15_ratios_outlier_rplcd set Fin_Resrvs_relative_to_Oprtns='0.000827814596947503' where Fin_Resrvs_relative_to_Oprtns<'0.000827814596947503'
+update 3_15_ratios_outlier_rplcd set Opr_Prft_Net_Sales='-0.0658146670050059' where Opr_Prft_Net_Sales<'-0.0658146670050059'
+update 3_15_ratios_outlier_rplcd set Gross_Prft_Net_Sales='0.0783373301358913' where Gross_Prft_Net_Sales<'0.0783373301358913'
+update 3_15_ratios_outlier_rplcd set Return_on_Assets_Prev_YR='-0.119345470791913' where Return_on_Assets_Prev_YR<'-0.119345470791913'
+update 3_15_ratios_outlier_rplcd set Return_on_Assets='-0.130892295971812' where Return_on_Assets<'-0.130892295971812'
+update 3_15_ratios_outlier_rplcd set Change_Return_on_Assets='-0.15522874650931' where Change_Return_on_Assets<'-0.15522874650931'
+update 3_15_ratios_outlier_rplcd set Return_On_Equity='-0.441589835844389' where Return_On_Equity<'-0.441589835844389'
+update 3_15_ratios_outlier_rplcd set EBITDA_Margin='-0.0104949270437248' where EBITDA_Margin<'-0.0104949270437248'
+update 3_15_ratios_outlier_rplcd set Prft_before_Tax_to_Net_Sales='-0.157173535944491' where Prft_before_Tax_to_Net_Sales<'-0.157173535944491'
+update 3_15_ratios_outlier_rplcd set Sales_Growth='-0.188681396939173' where Sales_Growth<'-0.188681396939173'
+update 3_15_ratios_outlier_rplcd set Debt_to_Assets_Current='0' where Debt_to_Assets_Current<'0'
+update 3_15_ratios_outlier_rplcd set Debt_to_Assets_Previous='0' where Debt_to_Assets_Previous<'0'
+update 3_15_ratios_outlier_rplcd set Change_Debt_to_Assets='-0.141845782739744' where Change_Debt_to_Assets<'-0.141845782739744'
+update 3_15_ratios_outlier_rplcd set CAPEX_to_Depreciation='0' where CAPEX_to_Depreciation<'0'
+update 3_15_ratios_outlier_rplcd set Change_Revenue_to_Change_EBITDA='-16.5496936507076' where Change_Revenue_to_Change_EBITDA<'-16.5496936507076'
+update 3_15_ratios_outlier_rplcd set Operating_Profit_Growth='-132.567071448743' where Operating_Profit_Growth<'-132.567071448743'
+
+
+
+
+
+
+--------------------------
+
+--95 percentile
+
+update 3_15_ratios_outlier_rplcd set Net_Sales_CPI_Currency_Adj='10045678102.5529' where Net_Sales_CPI_Currency_Adj>'10045678102.5529'
+update 3_15_ratios_outlier_rplcd set Log_Net_Sales='10.0019792577848' where Log_Net_Sales>'10.0019792577848'
+update 3_15_ratios_outlier_rplcd set Assets_CPI_Currency_Adj='12198778040.9063' where Assets_CPI_Currency_Adj>'12198778040.9063'
+update 3_15_ratios_outlier_rplcd set Log_Assets='10.0863163293083' where Log_Assets>'10.0863163293083'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_Ttl_Capitalization='1.00158017511104' where Ttl_Debt_to_Ttl_Capitalization>'1.00158017511104'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_Ttl_Assets='0.741933055798415' where Ttl_Debt_to_Ttl_Assets>'0.741933055798415'
+update 3_15_ratios_outlier_rplcd set LT_Debt_to_LT_Debt_NW='0.965442823705475' where LT_Debt_to_LT_Debt_NW>'0.965442823705475'
+update 3_15_ratios_outlier_rplcd set RE_to_Current_Liabilities='5.58952971083572' where RE_to_Current_Liabilities>'5.58952971083572'
+update 3_15_ratios_outlier_rplcd set Ttl_Equity_to_Ttl_Fixed_Assets='13.7446090447263' where Ttl_Equity_to_Ttl_Fixed_Assets>'13.7446090447263'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_Ttl_Equity='4.58467907515434' where Ttl_Debt_to_Ttl_Equity>'4.58467907515434'
+update 3_15_ratios_outlier_rplcd set Cash_Net_Sales='0.603845756228678' where Cash_Net_Sales>'0.603845756228678'
+update 3_15_ratios_outlier_rplcd set WC_Accruals_Current='0.334195093306489' where WC_Accruals_Current>'0.334195093306489'
+update 3_15_ratios_outlier_rplcd set WC_Accruals_Previous='0.337845240314071' where WC_Accruals_Previous>'0.337845240314071'
+update 3_15_ratios_outlier_rplcd set Change_WC_Accruals='0.134219723845395' where Change_WC_Accruals>'0.134219723845395'
+update 3_15_ratios_outlier_rplcd set Inventory_to_Sales='0.293911803248015' where Inventory_to_Sales>'0.293911803248015'
+update 3_15_ratios_outlier_rplcd set WC_to_Sales_Current='0.389108688136877' where WC_to_Sales_Current>'0.389108688136877'
+update 3_15_ratios_outlier_rplcd set WC_to_Sales_Previous='0.392941154242204' where WC_to_Sales_Previous>'0.392941154242204'
+update 3_15_ratios_outlier_rplcd set Change_WC_to_Sales='0.0964533936988353' where Change_WC_to_Sales>'0.0964533936988353'
+update 3_15_ratios_outlier_rplcd set Current_Liabilites_to_Sales='0.586887322482542' where Current_Liabilites_to_Sales>'0.586887322482542'
+update 3_15_ratios_outlier_rplcd set Accounts_Payable_Days='147.38987660873' where Accounts_Payable_Days>'147.38987660873'
+update 3_15_ratios_outlier_rplcd set Accounts_Receivable_Days='92.9436048618525' where Accounts_Receivable_Days>'92.9436048618525'
+update 3_15_ratios_outlier_rplcd set EBIT_to_Int_Exp='101.414507772021' where EBIT_to_Int_Exp>'101.414507772021'
+update 3_15_ratios_outlier_rplcd set EBITDA_Int_Exp='133.735849056604' where EBITDA_Int_Exp>'133.735849056604'
+update 3_15_ratios_outlier_rplcd set Ttl_Debt_to_EBITDA='8.95005424586782' where Ttl_Debt_to_EBITDA>'8.95005424586782'
+update 3_15_ratios_outlier_rplcd set EBITDA_Int_Tx_Div_CAPX_to_Tl_Dt='2.55771428571428' where EBITDA_Int_Tx_Div_CAPX_to_Tl_Dt>'2.55771428571428'
+update 3_15_ratios_outlier_rplcd set Retained_Cash_Flow_to_Ttl_Debt='5.23236313706367' where Retained_Cash_Flow_to_Ttl_Debt>'5.23236313706367'
+update 3_15_ratios_outlier_rplcd set OCF_to_Debt='6.76679841897233' where OCF_to_Debt>'6.76679841897233'
+update 3_15_ratios_outlier_rplcd set Cash_to_Current_Liabilities='2.71931961739758' where Cash_to_Current_Liabilities>'2.71931961739758'
+update 3_15_ratios_outlier_rplcd set Cash_to_Assests='0.431809729875925' where Cash_to_Assests>'0.431809729875925'
+update 3_15_ratios_outlier_rplcd set Quick_Ratio='3.68323863636364' where Quick_Ratio>'3.68323863636364'
+update 3_15_ratios_outlier_rplcd set Cash_to_Debt='13.2087754516777' where Cash_to_Debt>'13.2087754516777'
+update 3_15_ratios_outlier_rplcd set Change_WC_to_OCF='2.72954866008463' where Change_WC_to_OCF>'2.72954866008463'
+update 3_15_ratios_outlier_rplcd set Current_Ratio='4.90888447926682' where Current_Ratio>'4.90888447926682'
+update 3_15_ratios_outlier_rplcd set Fin_Resrvs_relative_to_Oprtns='1.2607272564229' where Fin_Resrvs_relative_to_Oprtns>'1.2607272564229'
+update 3_15_ratios_outlier_rplcd set Opr_Prft_Net_Sales='0.31842525270438' where Opr_Prft_Net_Sales>'0.31842525270438'
+update 3_15_ratios_outlier_rplcd set Gross_Prft_Net_Sales='1' where Gross_Prft_Net_Sales>'1'
+update 3_15_ratios_outlier_rplcd set Return_on_Assets_Prev_YR='0.194899857247913' where Return_on_Assets_Prev_YR>'0.194899857247913'
+update 3_15_ratios_outlier_rplcd set Return_on_Assets='0.200036213123763' where Return_on_Assets>'0.200036213123763'
+update 3_15_ratios_outlier_rplcd set Change_Return_on_Assets='0.137962486311092' where Change_Return_on_Assets>'0.137962486311092'
+update 3_15_ratios_outlier_rplcd set Return_On_Equity='0.717948717948718' where Return_On_Equity>'0.717948717948718'
+update 3_15_ratios_outlier_rplcd set EBITDA_Margin='0.462876040110945' where EBITDA_Margin>'0.462876040110945'
+update 3_15_ratios_outlier_rplcd set Prft_before_Tax_to_Net_Sales='0.291143038815738' where Prft_before_Tax_to_Net_Sales>'0.291143038815738'
+update 3_15_ratios_outlier_rplcd set Sales_Growth='1.99257191023074' where Sales_Growth>'1.99257191023074'
+update 3_15_ratios_outlier_rplcd set Debt_to_Assets_Current='0.741933055798415' where Debt_to_Assets_Current>'0.741933055798415'
+update 3_15_ratios_outlier_rplcd set Debt_to_Assets_Previous='0.718942847579402' where Debt_to_Assets_Previous>'0.718942847579402'
+update 3_15_ratios_outlier_rplcd set Change_Debt_to_Assets='0.179710108395441' where Change_Debt_to_Assets>'0.179710108395441'
+update 3_15_ratios_outlier_rplcd set CAPEX_to_Depreciation='7.9070507452688' where CAPEX_to_Depreciation>'7.9070507452688'
+update 3_15_ratios_outlier_rplcd set Change_Revenue_to_Change_EBITDA='29.7107191547376' where Change_Revenue_to_Change_EBITDA>'29.7107191547376'
+update 3_15_ratios_outlier_rplcd set Operating_Profit_Growth='851.846408230755' where Operating_Profit_Growth>'851.846408230755'
+
+
+---------------------------------------
+
+/*Two more variables for these two ratios 
+Operating Profit Growth”  and Sales Growth
+with overall cut off as 7.5th and 92.5th percentile values*/
+
+alter table 3_15_ratios_outlier_rplcd add 
+Sales_Growth_2 float,
+Operating_Profit_Growth_2 float
+
+update 3_15_ratios_outlier_rplcd set Sales_Growth_2=b.Sales_Growth,
+Operating_Profit_Growth_2=b.Operating_Profit_Growth
+from 3_15_ratios_outlier_rplcd a,AMC_Sample_Data b
+where a.coded_name=b.Coded_Name
+and a.stmt_year=b.Stmt_Year
+and a.bal_stmt_date=b.Bal_Stmt_Date
+--127744
+
+
+---Sales_Growth_2
+
+select distinct 'Sales_Growth_2',
+		(	(SELECT MAX(Sales_Growth_2) FROM
+			(SELECT TOP 7.5 PERCENT Sales_Growth_2 FROM 3_15_ratios_outlier_rplcd
+			 WHERE Sales_Growth_2 IS NOT NULL
+			 ORDER BY Sales_Growth_2) AS H1)
+		+
+			(SELECT MIN(Sales_Growth_2) FROM
+			(SELECT TOP 92.5 PERCENT Sales_Growth_2 FROM 3_15_ratios_outlier_rplcd 
+			 WHERE Sales_Growth_2 IS NOT NULL
+			 ORDER BY Sales_Growth_2 DESC) AS H2)
+	) / 2 AS 'P7.5',
+	(		(SELECT MAX(Sales_Growth_2) FROM
+			(SELECT TOP 92.5 PERCENT Sales_Growth_2 FROM 3_15_ratios_outlier_rplcd
+			 WHERE Sales_Growth_2 IS NOT NULL
+			 ORDER BY Sales_Growth_2) AS H1)
+		+
+			(SELECT MIN(Sales_Growth_2) FROM
+			(SELECT TOP 7.5 PERCENT Sales_Growth_2 FROM 3_15_ratios_outlier_rplcd 
+			 WHERE Sales_Growth_2 IS NOT NULL
+			 ORDER BY Sales_Growth_2 DESC) AS H2)
+	)	 / 2 AS 'P92.5'
+	
+	
+	
+---Operating_Profit_Growth_2
+
+select distinct 'Operating_Profit_Growth_2',
+		(	(SELECT MAX(Operating_Profit_Growth_2) FROM
+			(SELECT TOP 7.5 PERCENT Operating_Profit_Growth_2 FROM 3_15_ratios_outlier_rplcd
+			 WHERE Operating_Profit_Growth_2 IS NOT NULL
+			 ORDER BY Operating_Profit_Growth_2) AS H1)
+		+
+			(SELECT MIN(Operating_Profit_Growth_2) FROM
+			(SELECT TOP 92.5 PERCENT Operating_Profit_Growth_2 FROM 3_15_ratios_outlier_rplcd 
+			 WHERE Operating_Profit_Growth_2 IS NOT NULL
+			 ORDER BY Operating_Profit_Growth_2 DESC) AS H2)
+	) / 2 AS 'P7.5',
+	(		(SELECT MAX(Operating_Profit_Growth_2) FROM
+			(SELECT TOP 92.5 PERCENT Operating_Profit_Growth_2 FROM 3_15_ratios_outlier_rplcd
+			 WHERE Operating_Profit_Growth_2 IS NOT NULL
+			 ORDER BY Operating_Profit_Growth_2) AS H1)
+		+
+			(SELECT MIN(Operating_Profit_Growth_2) FROM
+			(SELECT TOP 7.5 PERCENT Operating_Profit_Growth_2 FROM 3_15_ratios_outlier_rplcd 
+			 WHERE Operating_Profit_Growth_2 IS NOT NULL
+			 ORDER BY Operating_Profit_Growth_2 DESC) AS H2)
+	)	 / 2 AS 'P92.5'
+	
+	
+	--7.5 Percentile
+	
+update 3_15_ratios_outlier_rplcd set Sales_Growth_2='-0.136082517489854' 
+where Sales_Growth_2<'-0.136082517489854'
+
+update 3_15_ratios_outlier_rplcd set Operating_Profit_Growth_2='-89.7917504221275' 
+where Operating_Profit_Growth_2<'-89.7917504221275'
+
+
+--92.5 percentile
+
+update 3_15_ratios_outlier_rplcd set Sales_Growth_2='0.909480820486531' 
+where Sales_Growth_2>'0.909480820486531'
+
+update 3_15_ratios_outlier_rplcd set Operating_Profit_Growth_2='328.467445208767' 
+where Operating_Profit_Growth_2>'328.467445208767'
+
+

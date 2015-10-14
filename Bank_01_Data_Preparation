@@ -1,0 +1,380 @@
+
+-----------------------------------
+/*Creating a temporary table from OBLIGOR_HISTORY_ALL for extracting 
+wholesale portfolio and asofdate ='1/31/2012'*/
+
+if object_id('tempdb..#test') is not null drop table #test
+select * 
+into #test
+from icra_Bank.dbo.OBLIGOR_HISTORY_ALL 
+		where WHL_RET_TREATMENT_ADJUSTED='whl'
+		and asofdate ='1/31/2012' order by ENTITY_ID,asofdate
+--9921	
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--01_Base_Stale 
+
+if object_id('tempdb..#01_Base_Stale') is not null drop table #01_Base_Stale
+SELECT A.*,LEFT(LEFT('000000',5-LEN([mainzipcode]))+[MainZipCode],5)'ZipCode_Adj',
+Guarantor=CASE WHEN [guar_adj_pd_cd] IS NOT NULL THEN 1
+ELSE 0 END,
+Left([SIC_Code],2) AS SIC_2dgt,
+'' AS [Size], 
+A.SUB_SEGMENTATION_ALL AS sub_segment
+into #01_Base_Stale
+FROM #test A
+WHERE (A.RATING_AGE_MONTHS)>18
+--1194
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--01_b_Base_Stale_WOS 
+
+if object_id('tempdb..#01_Base_WOS') is not null drop table #01_Base_WOS
+SELECT A.*,LEFT(LEFT('000000',5-LEN([mainzipcode]))+[MainZipCode],5)'ZipCode_Adj',
+Guarantor=CASE WHEN [guar_adj_pd_cd] IS NOT NULL THEN 1
+ELSE 0 END,
+Left([SIC_Code],2) AS SIC_2dgt,
+'' AS [Size], 
+A.SUB_SEGMENTATION_ALL AS sub_segment
+INTO #01_Base_WOS
+FROM #test A
+WHERE SUB_SEGMENTATION_ALL='Wholly Owned Subsidiary'
+--227
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--01_c_Base_Late (SQL Code)
+
+if object_id('tempdb..#01_Base_Late') is not null drop table #01_Base_Late
+SELECT A.*,LEFT(LEFT('000000',5-LEN([mainzipcode]))+[MainZipCode],5)'ZipCode_Adj',
+Guarantor=CASE WHEN [guar_adj_pd_cd] IS NOT NULL THEN 1
+ELSE 0 END,
+Left([SIC_Code],2) AS SIC_2dgt,
+'' AS [Size], 
+A.SUB_SEGMENTATION_ALL AS sub_segment
+INTO #01_Base_Late
+FROM #test A
+WHERE (A.STATEMENT_AGE_MONTHS)>18
+--981
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--02b Stale portfolio segment (SQL code)
+
+SELECT sub_segment AS Segment, 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Stale
+GROUP BY sub_segment
+order by sub_segment
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--03b. Stale portfolio summary industry (SQL code)
+
+SELECT NAICS_SECTOR_NM AS Industry, 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Stale
+GROUP BY NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--04b. Stale portfolio summary turnover size (SQL code)
+
+SELECT
+CASE	  
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end AS NS_Size_2,
+		  Count(entity_ID) AS [# of Clients], 
+			Sum([net_exposure]/1000000) AS [Commitment $MM]
+		FROM #01_Base_Stale
+		GROUP BY CASE
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end
+		order BY CASE
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end
+		 
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--05b. Stale portfolio summary region (SQL code)
+
+SELECT
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END AS Region,
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Stale A 
+LEFT OUTER JOIN ICRA_Bank.dbo.LOOKUP_free_zipcode_DB_Primary B
+ON A.ZipCode_Adj=B.ZipCode_5dgt
+LEFT OUTER JOIN ICRA_Bank.dbo.LOOKUP_StateToRegion_Map C
+ON B.State = C.State
+GROUP  BY 
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END
+ORDER BY 
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--06b. Stale portfolio summary final rating (SQL code)
+ 
+SELECT [FINAL_PD_CD]*1 AS [Final Rating], 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Stale
+GROUP BY [FINAL_PD_CD]*1
+ORDER BY [FINAL_PD_CD]*1
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--07 WOS portfolio summary industry (sql code)
+
+SELECT NAICS_SECTOR_NM AS Industry, 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_WOS
+GROUP BY NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--08. WOS portfolio summary turnover size (SQL code)
+
+SELECT
+CASE	  
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end AS NS_Size_2,
+		  Count(entity_ID) AS [# of Clients], 
+			Sum([net_exposure]/1000000) AS [Commitment $MM]
+		FROM #01_Base_WOS
+		GROUP BY CASE
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end
+		order BY CASE
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end
+		 
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--09. WOS portfolio summary region (SQL code)
+
+SELECT
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END AS Region,
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_WOS A 
+LEFT OUTER JOIN ICRA_Bank.dbo.LOOKUP_free_zipcode_DB_Primary B
+ON A.ZipCode_Adj=B.ZipCode_5dgt
+LEFT OUTER JOIN ICRA_Bank.dbo.LOOKUP_StateToRegion_Map C
+ON B.State = C.State
+GROUP  BY 
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END
+ORDER BY 
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--10. WOS portfolio summary final rating (SQL code)
+ 
+SELECT [FINAL_PD_CD]*1 AS [Final Rating], 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_WOS
+GROUP BY [FINAL_PD_CD]*1
+ORDER BY [FINAL_PD_CD]*1
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+---11 Late portfolio segment (sql code)
+
+SELECT sub_segment AS Segment, 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Late
+GROUP BY sub_segment
+order by sub_segment
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+---12 Late portfolio summary industry (sql code)
+
+SELECT NAICS_SECTOR_NM AS Industry, 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Late
+GROUP BY NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--13. Stale portfolio summary turnover size (SQL code)
+
+SELECT
+CASE	  
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end AS NS_Size_2,
+		  Count(entity_ID) AS [# of Clients], 
+			Sum([net_exposure]/1000000) AS [Commitment $MM]
+		FROM #01_Base_Late
+		GROUP BY CASE
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end
+		order BY CASE
+		  WHEN[NET_SALES]<=500 THEN 'a:Less than 500K'
+		  WHEN [NET_SALES]<=1000 THEN 'b:500K to 1M'
+		  WHEN [NET_SALES]<=5000 THEN 'c:1M to 5M'
+		  WHEN [NET_SALES]<=10000 THEN 'd:5M to 10M'
+		  WHEN [NET_SALES]<=25000 THEN 'e:10M to 25M'
+		  WHEN [NET_SALES]<=50000 THEN 'f:25M to 50M'
+		  WHEN [NET_SALES]<=100000 THEN 'g:50M to 100M'
+		  WHEN [NET_SALES]<=500000 THEN 'h:100M to 500M'
+		  WHEN [NET_SALES]>500000 THEN 'i:Greater than 500M' 
+		  ELSE 'j:Unknown' end
+		 
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--14. Late portfolio summary region (SQL code)
+
+SELECT
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END AS Region,
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Late A 
+LEFT OUTER JOIN ICRA_Bank.dbo.LOOKUP_free_zipcode_DB_Primary B
+ON A.ZipCode_Adj=B.ZipCode_5dgt
+LEFT OUTER JOIN ICRA_Bank.dbo.LOOKUP_StateToRegion_Map C
+ON B.State = C.State
+GROUP  BY 
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END
+ORDER BY 
+CASE WHEN [CRD_Region]='New England' Or 
+[CRD_Region]='Mid Atlantic' Or 
+[CRD_Region]='North Central' THEN [CRD_Region] 
+ELSE 'All Other' END
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+--15. late portfolio summary final rating (SQL code)
+ 
+SELECT [FINAL_PD_CD]*1 AS [Final Rating], 
+Count(entity_ID) AS [# of Clients], 
+Sum([net_exposure]/1000000) AS [Commitment $MM]
+FROM #01_Base_Late
+GROUP BY [FINAL_PD_CD]*1
+ORDER BY [FINAL_PD_CD]*1
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+--16.Total Portfolio (SQL Code)
+
+SELECT asofdate, Count(ENTITY_ID) AS [# Clients], 
+Sum([NET_EXPOSURE]/1000000) AS [Exposure ($MM)]
+FROM #test
+GROUP BY asofdate

@@ -1,0 +1,4231 @@
+-- PLEASE CHANGE THIS TO YOUR DATABASE NAME
+USE Bank
+GO
+
+
+-- Run this drop table script before and after the script below to clear your temp table
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+if object_id('tempdb..#temp_MidCorp_Obligors') is not null drop table #temp_MidCorp_Obligors
+if object_id('tempdb..#temp_BestAQ') is not null drop table #temp_BestAQ
+if object_id('tempdb..#temp_BestAQ2') is not null drop table #temp_BestAQ2
+if object_id('tempdb..#temp_BestAQ3') is not null drop table #temp_BestAQ3
+if object_id('tempdb..#temp_monthly') is not null drop table #temp_monthly
+if object_id('tempdb..#Recent_Stmt') is not null drop table #Recent_Stmt
+if object_id('tempdb..#temp_MidCorp_AllMatchedObs') is not null drop table #temp_MidCorp_AllMatchedObs
+if object_id('tempdb..#temp_MidCorp_AllMatchedObs_Final') is not null drop table #temp_MidCorp_AllMatchedObs_Final
+if OBJECT_ID('tempdb..#temp_Obligor_History') is not null drop table #temp_Obligor_History
+if OBJECT_ID('tempdb..#PivotOblig') is not null drop table #PivotOblig
+if OBJECT_ID('tempdb..#PivotDef') is not null drop table #PivotDef
+if OBJECT_ID('tempdb..#temp_CIOther') is not null drop table #temp_CIOther
+if OBJECT_ID('tempdb..#temp_Retail') is not null drop table #temp_Retail
+if OBJECT_ID('tempdb..#temp_CEB') is not null drop table #temp_CEB
+if OBJECT_ID('tempdb..#temp_MM') is not null drop table #temp_MM
+if OBJECT_ID('tempdb..#temp_MidCorp') is not null drop table #temp_MidCorp
+if object_id('tempdb..#YR_EDF2') is not null drop table #YR_EDF2
+if object_id('tempdb..#Exp1') is not null drop table #Exp1
+if object_id('tempdb..#p_Retail') is not null drop table #p_Retail
+if object_id('tempdb..#Exp2') is not null drop table #Exp2
+if object_id('tempdb..#p_CIOther') is not null drop table #p_CIOther
+if object_id('tempdb..#Exp3') is not null drop table #Exp3
+if object_id('tempdb..#p_CEB') is not null drop table #p_CEB
+if object_id('tempdb..#Exp4') is not null drop table #Exp4
+if object_id('tempdb..#p_MM') is not null drop table #p_MM
+if object_id('tempdb..#Exp5') is not null drop table #Exp5
+if object_id('tempdb..#p_MidCorp') is not null drop table #p_MidCorp
+--if object_id('MidCorp_Statements_forCCA') is not null drop table MidCorp_Statements_forCCA
+
+if OBJECT_ID('tempdb..#temp_MidCorpFSO') is not null drop table #temp_MidCorpFSO
+
+--if OBJECT_ID('MidCorp_Statements_forFSO') is not null drop table MidCorp_Statements_forFSO
+
+if OBJECT_ID('tempdb..#Recent_Stmt2') is not null drop table #Recent_Stmt2
+if OBJECT_ID('tempdb..#Recent_Stmt3') is not null drop table #Recent_Stmt3
+if OBJECT_ID('tempdb..#wCure') is not null drop table #wCure
+if OBJECT_ID('tempdb..#woCure') is not null drop table #woCure
+if OBJECT_ID('tempdb..#NAICS_All') is not null drop table #NAICS_All
+if OBJECT_ID('tempdb..#NAICS_Def') is not null drop table #NAICS_Def
+if OBJECT_ID('tempdb..#MidCorp_Sales') is not null drop table #MidCorp_Sales
+if OBJECT_ID('tempdb..#Sales_All') is not null drop table #Sales_All
+if OBJECT_ID('tempdb..#Sales_Def') is not null drop table #Sales_Def
+if OBJECT_ID('tempdb..#All') is not null drop table #All
+if OBJECT_ID('tempdb..#Def') is not null drop table #Def
+if object_id('tempdb..#Summary_Region_All') is not null  drop table #Summary_Region_All
+if OBJECT_ID('tempdb..#region_all') is not null drop table #region_all
+if OBJECT_ID('tempdb..#region_Defaulted') is not null drop table #region_Defaulted
+if object_id('tempdb..#Universe') is not null  drop table #Universe
+if object_id('tempdb..#validation') is not null  drop table #validation
+if object_id('tempdb..#YR_EDF2A') is not null drop table #YR_EDF2A
+if object_id('tempdb..#DEFREP_RATIOS2') is not null drop table #DEFREP_RATIOS2
+if OBJECT_ID('tempdb..#All_Percentiles') is not null drop table #All_Percentiles
+if object_id('tempdb..#YR_EDF4') is not null drop table #YR_EDF4
+if object_id('tempdb..#DEFREP_RATIOS4') is not null drop table #DEFREP_RATIOS4
+if OBJECT_ID('tempdb..#Validation_Percentiles') is not null drop table #Validation_Percentiles
+if object_id('tempdb..#Def_All') is not null drop table #Def_All
+if object_id('tempdb..#Def_Validation') is not null drop table #Def_Validation
+if object_id('tempdb..#ndy_all') is not null drop table #ndy_all
+if object_id('tempdb..#ndy_def') is not null drop table #ndy_def
+if object_id('tempdb..#MidCorp_Sales_Comp') is not null drop table #MidCorp_Sales_Comp
+if object_id('tempdb..#sales_AllA') is not null drop table #sales_AllA
+if object_id('tempdb..#sales_DefA') is not null drop table #sales_DefA
+if object_id('tempdb..#assets_All') is not null drop table #assets_All
+if object_id('tempdb..#assets_def') is not null drop table #assets_def
+if OBJECT_ID('tempdb..#Percentiles_of_Percentiles') is not null drop table #Percentiles_of_Percentiles
+
+--if object_id('MidCorp_Modeling_Monthly') is not null drop table MidCorp_Modeling_Monthly
+
+if OBJECT_ID('tempdb..#temp_Curr_MidCorp') is not null drop table #temp_Curr_MidCorp
+if OBJECT_ID('tempdb..#Curr_MidCorp_Stmt_Matched') is not null drop table #Curr_MidCorp_Stmt_Matched
+if object_id('tempdb..#MidCorp_Sample_all') is not null drop table #MidCorp_Sample_all
+if OBJECT_ID('tempdb..#Midcorp_input_curr_risk_calc_CCA')is not null drop table #Midcorp_input_curr_risk_calc_CCA
+if OBJECT_ID('tempdb..#Midcorp_input_curr_risk_calc_CCA')is not null drop table #Midcorp_input_curr_risk_calc_FSO
+if OBJECT_ID('tempdb..#temp_Curr_CCA')			is not null drop table #temp_Curr_CCA
+
+--if object_id('MidCorp_Survey_Respon_Selected') is not null drop table MidCorp_Survey_Respon_Selected
+
+if object_id('tempdb..#YR_EDF2B') is not null drop table #YR_EDF2B
+if object_id('tempdb..#DEFREP_RATIOS2A') is not null drop table #DEFREP_RATIOS2A
+if object_id('tempdb..#DEFREP_RATIOS3') is not null drop table #DEFREP_RATIOS3
+
+--if object_id('MidCorp_CurStmt_toScore_Final') is not null drop table MidCorp_CurStmt_toScore_Final
+
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+
+----------------I. Obligor Filters--------------------
+
+--1. All Data
+SELECT 'All Monthly Observations',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL)as 'Obligor_Months',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL where DEFAULT_1YR_IND_fixed=1)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL 
+	where DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+
+--3. All Data-->C&I-->Mid-Corp
+
+SELECT 'Mid-Corp Filter',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL 
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp'))as 'Obligor_Months',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp'))as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp'))as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL 
+	where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp'))'Defaulted_Obligors'
+
+
+--4. All Data-->C&I-->Mid-Corp-->Wholesale Filter
+
+SELECT 'Wholesale Filter',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL 
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')and WHL_RET_TREATMENT_ADJUSTED='whl')as 'Obligor_Months',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl')as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl')as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL 
+	where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl')'Defaulted_Obligors'
+
+
+--5. All Data-->C&I-->Mid-Corp-->Wholesale Filter-->Time Period Filter
+
+SELECT 'Time Period Filter',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL 
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011')as 'Obligor_Months',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011')as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011')as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL 
+	where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011')'Defaulted_Obligors'
+
+
+--6. All Data-->C&I-->Mid-Corp-->Wholesale Filter-->Time Period Filter-->Not in-default
+
+SELECT 'Not in-default',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL 
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1)as 'Obligor_Months',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL 
+	where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1)'Defaulted_Obligors'
+
+--7. All Data-->C&I-->Mid-Corp-->Wholesale Filter-->Time Period Filter-->Not in-default-->Exc. Acquired Accts
+
+SELECT 'Exc Acquired Accts',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL 
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1
+	and ACQUIRED_ACCT_EXCLUDE_IND=0)as 'Obligor_Months',
+(select COUNT(*)from OBLIGOR_HISTORY_ALL where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1
+	and ACQUIRED_ACCT_EXCLUDE_IND=0)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL
+	where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1
+	and ACQUIRED_ACCT_EXCLUDE_IND=0)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from OBLIGOR_HISTORY_ALL 
+	where DEFAULT_1YR_IND_fixed=1
+	and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') and WHL_RET_TREATMENT_ADJUSTED='whl'
+	and asofdate between '1/31/2001' and '1/31/2011'
+	and Default_Ind_fixed<>1
+	and ACQUIRED_ACCT_EXCLUDE_IND=0)'Defaulted_Obligors'
+
+
+----------------II. RiskAnalyst Filters--------------------
+
+---9. All Financial statements
+
+SELECT 'All Financial statements',
+(select COUNT(*)from RISK_ANALYST_DATA)as 'Statements',
+(select count(distinct(ENTITY_ID))from RISK_ANALYST_DATA)as 'Obligors',
+(select count(distinct(b.ENTITY_ID))from RISK_ANALYST_DATA a
+	join OBLIGOR_HISTORY_ALL b
+	on a.entity_ID=b.ENTITY_ID and DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+
+---10. All Financial statements-->MidCorp
+
+if object_id('tempdb..#temp_MidCorp_Obligors') is not null drop table #temp_MidCorp_Obligors
+select distinct(entity_id) as entity_id
+into #temp_MidCorp_Obligors
+from dbo.OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+--984 unique obligors
+
+if object_id('tempdb..#temp_MidCorp_Obligors_Default_flag') is not null drop table #temp_MidCorp_Obligors_Default_flag
+select distinct(entity_id) as entity_id,DEFAULT_1YR_IND_fixed
+into #temp_MidCorp_Obligors_Default_flag
+from dbo.OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+--1014 unique (obligors + DEFAULT_1YR_IND_fixed)
+
+SELECT 'MidCorp Statements',
+(select COUNT(a.entity_ID)from RISK_ANALYST_DATA a
+	 join #temp_MidCorp_Obligors b on a.entity_ID=b.ENTITY_ID)as 'Statements',
+(select count(distinct(a.ENTITY_ID))from dbo.RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b on a.entity_ID=b.ENTITY_ID)as 'Obligors',
+(select count(distinct(c.ENTITY_ID))from RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b
+	on a.entity_ID=b.ENTITY_ID left join #temp_MidCorp_Obligors_Default_flag c
+	on  b.entity_ID=c.ENTITY_ID and c.DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+	
+	
+
+
+---11. All Financial statements--> Exclusion of Invalid values
+
+SELECT 'Exclusion of Invalid values',
+(select COUNT(*)from RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b on a.entity_ID=b.ENTITY_ID
+	WHERE Violation_Flag=0)as 'Statements',
+(select count(distinct(a.ENTITY_ID))from dbo.RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b on a.entity_ID=b.ENTITY_ID
+	WHERE Violation_Flag=0)as 'Obligors',
+(select count(distinct(c.ENTITY_ID))from RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b
+	on a.entity_ID=b.ENTITY_ID left join #temp_MidCorp_Obligors_Default_flag c
+	on  b.entity_ID=c.ENTITY_ID and c.DEFAULT_1YR_IND_fixed=1
+	WHERE Violation_Flag=0)'Defaulted_Obligors'
+
+---12. All Financial statements--> Exclusion of Invalid values--> Statements Balancing
+
+SELECT 'Statements Balancing',
+(select COUNT(*)from RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b on a.entity_ID=b.ENTITY_ID
+	WHERE Violation_Flag=0 AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Statements',
+(select count(distinct(a.ENTITY_ID))from dbo.RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b on a.entity_ID=b.ENTITY_ID
+	WHERE Violation_Flag=0 AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Obligors',
+(select count(distinct(c.ENTITY_ID))from RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b
+	on a.entity_ID=b.ENTITY_ID left join #temp_MidCorp_Obligors_Default_flag c
+	on  b.entity_ID=c.ENTITY_ID and c.DEFAULT_1YR_IND_fixed=1
+	WHERE Violation_Flag=0 AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)'Defaulted_Obligors'
+
+---12. All Financial statements--> Exclusion of Invalid values--> Statements Balancing-->Single Statement per Fiscal Year-->Best AQ
+
+if object_id('tempdb..#temp_BestAQ') is not null drop table #temp_BestAQ
+select entity_ID, YEAR(statementdate)as FY, min(AQ_Severity)as Best_AQ
+into #temp_BestAQ
+from dbo.RISK_ANALYST_DATA
+WHERE Violation_Flag=0 
+AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0
+group by entity_ID, YEAR(statementdate)
+--165672
+
+SELECT 
+	(select COUNT(*)from RISK_ANALYST_DATA a
+		join #temp_BestAQ b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Statements',
+	(select count(distinct(a.ENTITY_ID))from RISK_ANALYST_DATA a
+		join #temp_BestAQ b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Obligors',
+	(select count(distinct(d.ENTITY_ID))from RISK_ANALYST_DATA a
+		join #temp_BestAQ b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		left join #temp_MidCorp_Obligors_Default_flag d
+		on  b.entity_ID=d.ENTITY_ID and d.DEFAULT_1YR_IND_fixed=1
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0 and DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+
+---13. All Financial statements--> Exclusion of Invalid values--> Statements Balancing-->Single Statement per Fiscal Year-->Best AQ-->Latest Statement Date
+
+if object_id('tempdb..#temp_BestAQ2') is not null drop table #temp_BestAQ2
+select b.entity_ID,b.FY,b.Best_AQ,max(a.statementdate)as Stmt_Dt
+into #temp_BestAQ2
+from dbo.RISK_ANALYST_DATA a
+join #temp_BestAQ b
+on a.entity_ID=b.entity_ID
+and YEAR(a.statementdate)=b.FY
+and a.AQ_Severity=b.Best_AQ
+WHERE Violation_Flag=0 
+AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0
+group by b.entity_ID,b.FY,b.Best_AQ
+--165672
+
+
+SELECT 
+	(select COUNT(*)from RISK_ANALYST_DATA a
+		join #temp_BestAQ2 b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		and a.statementdate=b.Stmt_Dt
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Statements',
+	(select count(distinct(a.ENTITY_ID))from RISK_ANALYST_DATA a
+		join #temp_BestAQ2 b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		and a.statementdate=b.Stmt_Dt
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Obligors',
+	(select count(distinct(d.ENTITY_ID))from dbo.RISK_ANALYST_DATA a
+		join #temp_BestAQ2 b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		and a.statementdate=b.Stmt_Dt
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		left join #temp_MidCorp_Obligors_Default_flag d
+		on  b.entity_ID=d.ENTITY_ID and d.DEFAULT_1YR_IND_fixed=1
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0 and DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+
+---14. All Financial statements--> Exclusion of Invalid values--> Statements Balancing-->Single Statement per Fiscal Year-->Best AQ-->Latest Statement Date--> Latest Statement ID
+
+--Latest StatementID
+
+if object_id('tempdb..#temp_BestAQ3') is not null drop table #temp_BestAQ3
+select a.entity_ID,FY,Best_AQ,Stmt_Dt,MAX(statement_id)as Stmt_ID
+into #temp_BestAQ3
+FROM dbo.RISK_ANALYST_DATA a
+join #temp_BestAQ2 b
+on a.entity_ID=b.entity_ID
+and YEAR(a.statementdate)=b.FY
+and a.AQ_Severity=b.Best_AQ
+and a.statementdate=b.Stmt_Dt
+WHERE Violation_Flag=0 
+AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0
+group by a.entity_ID,FY,Best_AQ,Stmt_Dt
+--165672
+
+SELECT 
+	(select COUNT(*)from RISK_ANALYST_DATA a
+		join #temp_BestAQ3 b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		and a.statementdate=b.Stmt_Dt
+		and a.statement_ID=b.Stmt_ID
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Statements',
+	(select count(distinct(a.ENTITY_ID))from RISK_ANALYST_DATA a
+		join #temp_BestAQ3 b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		and a.statementdate=b.Stmt_Dt
+		and a.statement_ID=b.Stmt_ID
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0)as 'Obligors',
+	(select count(distinct(d.ENTITY_ID))from dbo.RISK_ANALYST_DATA a
+		join #temp_BestAQ3 b
+		on a.entity_ID=b.entity_ID
+		and YEAR(a.statementdate)=b.FY
+		and a.AQ_Severity=b.Best_AQ
+		and a.statementdate=b.Stmt_Dt
+		and a.statement_ID=b.Stmt_ID
+		join #temp_MidCorp_Obligors c
+		on a.entity_ID=c.ENTITY_ID
+		left join #temp_MidCorp_Obligors_Default_flag d
+		on  b.entity_ID=d.ENTITY_ID and d.DEFAULT_1YR_IND_fixed=1 
+		WHERE Violation_Flag=0 
+		AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0 and DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+
+----STEP BELOW ALREADY INCORPORATED IN INTERMEDIATE DATA, MOODYS_DISTINCT_IND APPROPRIATELY FLAGGED ------
+
+----update dbo.RISK_ANALYST_DATA
+----set MOODYS_DISTINCT_IND=null
+
+
+----update dbo.RISK_ANALYST_DATA
+----set MOODYS_DISTINCT_IND=1
+------select COUNT(*)
+----FROM dbo.RISK_ANALYST_DATA a
+----join #temp_BestAQ3 b
+----on a.entity_ID=b.entity_ID
+----and YEAR(a.statementdate)=b.FY
+----and a.AQ_Severity=b.Best_AQ
+----and a.statementdate=b.Stmt_Dt
+----and a.statement_ID=b.Stmt_ID
+----WHERE Violation_Flag=0 
+----AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0
+
+
+
+---15. All Financial statements--> Exclusion of Invalid values--> Statements Balancing-->Single Statement per Fiscal Year-->Best AQ-->Latest Statement Date--> Latest Statement ID-->Future Dates
+
+SELECT 
+(select COUNT(*)from RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b
+	on a.entity_ID=b.ENTITY_ID
+	where MOODYS_DISTINCT_IND=1 AND statementdate<='1/31/2011')as 'Statements',
+(select count(distinct(a.ENTITY_ID))from dbo.RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b
+	on a.entity_ID=b.ENTITY_ID
+	where MOODYS_DISTINCT_IND=1 AND statementdate<='1/31/2011')as 'Obligors',
+(select count(distinct(c.ENTITY_ID))from RISK_ANALYST_DATA a
+	join #temp_MidCorp_Obligors b
+	on a.entity_ID=b.ENTITY_ID
+	left join #temp_MidCorp_Obligors_Default_flag c
+	on  b.entity_ID=c.ENTITY_ID and c.DEFAULT_1YR_IND_fixed=1  
+	where MOODYS_DISTINCT_IND=1 AND statementdate<='1/31/2011'and DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+
+
+/*In the Ratio Calculation script we have created the Final Cleaned Risk Analyst table 
+(Table Name : From_Citizens_4.dbo.RISK_ANALYST_DISTINCT_RATIO) which along with the Obligor history table
+is used to create the linking table. This table contains all the 11 Citizens ratios,
+39 Moodys Ratios, Shumway and the Z scores. */
+
+-----------------------------III.Linking Filter-------------------------------------------
+------------------------------------------------------------------------------------------
+
+---16.For MidCorp--> within 3-18 months prior
+--drop table #temp_monthly
+if object_id('tempdb..#temp_monthly') is not null drop table #temp_monthly
+select entity_ID,asofdate,SUB_SEGMENTATION_ALL, DEFAULT_1YR_IND_fixed
+into #temp_monthly
+from dbo.OBLIGOR_HISTORY_ALL a
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+--37401
+
+--Join Cleaned RiskAnalyst table
+--drop table #Recent_Stmt
+if object_id('tempdb..#Recent_Stmt') is not null drop table #Recent_Stmt
+select a.entity_ID,asofdate, SUB_SEGMENTATION_ALL,DEFAULT_1YR_IND_fixed,Max(statementdate)as Recent_Stmt_Date
+into #Recent_Stmt
+from  #temp_monthly a
+join  dbo.RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID 
+where asofdate>statementdate and DATEDIFF(mm,statementdate,asofdate)>=3
+group by a.entity_ID,asofdate,SUB_SEGMENTATION_ALL,DEFAULT_1YR_IND_fixed
+--34738
+
+
+--drop table #temp_MidCorp_AllMatchedObs
+if object_id('tempdb..#temp_MidCorp_AllMatchedObs') is not null drop table #temp_MidCorp_AllMatchedObs
+select *, DATEDIFF(mm,Recent_Stmt_Date,asofdate)as Statement_Age
+into #temp_MidCorp_AllMatchedObs
+from #Recent_Stmt
+--34738
+
+--drop table #temp_MidCorp_AllMatchedObs_Final
+if object_id('tempdb..#temp_MidCorp_AllMatchedObs_Final') is not null drop table #temp_MidCorp_AllMatchedObs_Final
+select *
+into #temp_MidCorp_AllMatchedObs_Final
+from #temp_MidCorp_AllMatchedObs
+where Statement_Age between 3 and 18
+--32794
+
+select * from #temp_MidCorp_AllMatchedObs_Final
+
+
+SELECT 'Linked to Financial Statement dated 3 to 18 months prior to observation point',
+(select COUNT(*)from #temp_MidCorp_AllMatchedObs_Final)as 'Obligor_Months',
+(select COUNT(*)from #temp_MidCorp_AllMatchedObs_Final where DEFAULT_1YR_IND_fixed=1)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from #temp_MidCorp_AllMatchedObs_Final)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from #temp_MidCorp_AllMatchedObs_Final 
+	where DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+	
+select distinct entity_id,recent_stmt_date from #temp_MidCorp_AllMatchedObs_Final
+--Statement count 3221
+
+-----------------------------IV.Model Performance Comparison Subset-----------------------
+------------------------------------------------------------------------------------------
+
+--0. Matched Monthly Dataset
+SELECT 'Matched Monthly Dataset',
+(select COUNT(*)from MidCorp_Modeling_Monthly)as 'Obligor_Months',
+(select COUNT(*)from MidCorp_Modeling_Monthly where DEFAULT_1YR_IND_fixed=1)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly 
+	where DEFAULT_1YR_IND_fixed=1)'Defaulted_Obligors'
+
+--1. QER not missing
+SELECT 'QER not missing',
+(select COUNT(*)from MidCorp_Modeling_Monthly where Quant_Engine_Rating is not null)as 'Obligor_Months',
+(select COUNT(*)from MidCorp_Modeling_Monthly where DEFAULT_1YR_IND_fixed=1 and Quant_Engine_Rating is not null)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly where Quant_Engine_Rating is not null)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly 
+	where DEFAULT_1YR_IND_fixed=1 and Quant_Engine_Rating is not null)'Defaulted_Obligors'
+
+--2. QER not missing--> RiskCalc EDFs not missing
+SELECT 'RiskCalc EDFs not missing',
+(select COUNT(*)from MidCorp_Modeling_Monthly where Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null)as 'Obligor_Months',
+(select COUNT(*)from MidCorp_Modeling_Monthly where DEFAULT_1YR_IND_fixed=1 and Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly where Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly 
+	where DEFAULT_1YR_IND_fixed=1 and Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null)'Defaulted_Obligors'
+
+--3. QER not missing--> RiskCalc EDFs not missing-->Z-Score not missing
+SELECT 'Z-Score not missing',
+(select COUNT(*)from MidCorp_Modeling_Monthly where Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null and [zscore5] is not null)as 'Obligor_Months',
+(select COUNT(*)from MidCorp_Modeling_Monthly where DEFAULT_1YR_IND_fixed=1 and Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null and [zscore5] is not null)as 'Defaulted_Obligor_Months',
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly where Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null and [zscore5] is not null)as 'Obligors' ,
+(select count(distinct(ENTITY_ID))from MidCorp_Modeling_Monthly 
+	where DEFAULT_1YR_IND_fixed=1 and Quant_Engine_Rating is not null and [Cumulative_1_Yr_EDF] is not null and [Cumulative_1_Yr_FSO_EDF] is not null and [zscore5] is not null)'Defaulted_Obligors'
+
+
+
+
+
+---------------------Statistics to support each filter (charts, etc.)---------------------
+------------------------------------------------------------------------------------------
+
+
+--1.Summary by Wholesale Flag	
+select WHL_RET_TREATMENT_ADJUSTED, COUNT(distinct(ENTITY_ID))as obligors	
+from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+group by WHL_RET_TREATMENT_ADJUSTED
+order by WHL_RET_TREATMENT_ADJUSTED
+
+select COUNT(distinct(ENTITY_ID))as obligors from  OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+	
+
+--2.MidCorp Obligors by Month --To show time cutoff
+select asofdate, COUNT(distinct(ENTITY_ID))as obligors	
+from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and WHL_RET_TREATMENT_ADJUSTED='whl'
+group by asofdate
+order by asofdate	
+
+--3a. Obligors over time by acquired_account (yes/no)--make into cross tab
+select ACQUIRED_ACCT_EXCLUDE_IND,asofdate,count(distinct(ENTITY_ID))as Obligors
+from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1	
+group by ACQUIRED_ACCT_EXCLUDE_IND,asofdate
+
+--3b. match rates by acquired_account (yes/no)--make into cross tab
+select ACQUIRED_ACCT_EXCLUDE_IND,MATCH_FLAG,count(distinct(ENTITY_ID))as Obligors
+from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1	
+group by ACQUIRED_ACCT_EXCLUDE_IND,MATCH_FLAG
+
+--3c. net exposure by acquired_account (yes/no)--make into cross tab
+select ACQUIRED_ACCT_EXCLUDE_IND,AVG(net_Exposure)
+from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1	
+group by ACQUIRED_ACCT_EXCLUDE_IND
+	
+	
+
+--4--Obligors by C&I Sub-segment Over Time --CROSSTAB--	including Retail
+
+if OBJECT_ID('tempdb..#temp_Obligor_History') is not null drop table #temp_Obligor_History
+select *,SUB_SEGMENTATION_ALL2=
+case when WHL_RET_TREATMENT_ADJUSTED='RET' then 'Retail'
+else SUB_SEGMENTATION_ALL
+end
+into #temp_Obligor_History
+from OBLIGOR_HISTORY_ALL
+where asofdate between '1/31/2001' and '1/31/2011'
+--5552616
+
+if OBJECT_ID('tempdb..#PivotOblig') is not null drop table #PivotOblig
+SELECT asofdate,SUB_SEGMENTATION_ALL2, COUNT(distinct(entity_ID)) as Obligors	
+into #PivotOblig
+from #temp_Obligor_History
+where (WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('C&I','CEB','Mid/Large Corp','Middle Market'))
+--or WHL_RET_TREATMENT_ADJUSTED='RET'
+group by asofdate,SUB_SEGMENTATION_ALL2	
+order by asofdate,SUB_SEGMENTATION_ALL2	
+---484
+ 
+select * from #PivotOblig -- --make into cross tab
+
+--4b-Default rates by C&I sub-segment
+
+if OBJECT_ID('tempdb..#PivotDef') is not null drop table #PivotDef
+SELECT asofdate,SUB_SEGMENTATION_ALL2, SUM(CAST(DEFAULT_1YR_IND_fixed AS INT)) as Obligors	
+into #PivotDef
+from #temp_Obligor_History
+where (WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('C&I','CEB','Mid/Large Corp','Middle Market'))
+--or WHL_RET_TREATMENT_ADJUSTED='RET'
+group by asofdate,SUB_SEGMENTATION_ALL2	
+order by asofdate,SUB_SEGMENTATION_ALL2	
+
+--484
+
+select * from #PivotDef --make into cross tab
+
+--5 Summary C&I Portfolio	
+select SUB_SEGMENTATION_ALL, COUNT(distinct(ENTITY_ID))as obligors	
+from OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('C&I','CEB','Mid/Large Corp','Middle Market')
+group by SUB_SEGMENTATION_ALL
+order by SUB_SEGMENTATION_ALL
+
+--5b Summary C&I Portfolio- Distinct Obligors
+select COUNT(distinct(ENTITY_ID))as obligors	
+from OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('C&I','CEB','Mid/Large Corp','Middle Market')
+
+
+-------6a Migration pattern for C&I Other--including Retail Flag-----
+--C&I_Other
+if OBJECT_ID('tempdb..#temp_CIOther') is not null drop table #temp_CIOther
+select distinct(entity_ID)
+into #temp_CIOther
+from OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('C&I')
+--13416
+
+--Retail
+if OBJECT_ID('tempdb..#temp_Retail') is not null drop table #temp_Retail
+select distinct(entity_ID)
+into #temp_Retail
+from OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='RET'
+--79977
+
+--CEB
+if OBJECT_ID('tempdb..#temp_CEB') is not null drop table #temp_CEB
+select distinct(entity_ID)
+into #temp_CEB
+from OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('CEB')
+--8462
+
+--MiddleMarket
+if OBJECT_ID('tempdb..#temp_MM') is not null drop table #temp_MM
+select distinct(entity_ID)
+into #temp_MM
+from OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('Middle Market')
+--4633
+
+--MidCorp
+if OBJECT_ID('tempdb..#temp_MidCorp') is not null drop table #temp_MidCorp
+select distinct(entity_ID)
+into #temp_MidCorp
+from OBLIGOR_HISTORY_ALL
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+--984
+
+--CIOther in Retail
+select COUNT(*) as In_Retail
+from #temp_CIOther a
+join #temp_Retail b
+on a.entity_id=b.entity_id
+
+--CIOther in CEB
+select COUNT(*) as In_CEB
+from #temp_CIOther a
+join #temp_CEB b
+on a.entity_id=b.entity_id
+
+--CIOther in MM
+select COUNT(*) as In_MM
+from #temp_CIOther a
+join #temp_MM b
+on a.entity_id=b.entity_id
+
+--CIOther in MidCorp
+select COUNT(*) as In_MidCorp
+from #temp_CIOther a
+join #temp_MidCorp b
+on a.entity_id=b.entity_id
+
+--CIOther in no other segment
+select COUNT(*) as In_CIOther_Only
+from #temp_CIOther a
+left join #temp_Retail b
+on a.entity_id=b.entity_id
+left join #temp_CEB c
+on a.entity_id=c.entity_id
+left join #temp_MM d
+on a.entity_id=d.entity_id
+left join #temp_MidCorp e
+on a.entity_id=e.entity_id
+where b.entity_id is null 
+and c.entity_id is null 
+and d.entity_id is null 
+and e.entity_id is null
+
+
+
+--7a.Exposure size distribution for Wholesale C&I sub-segments---
+
+--GET DISTINCT YEAR
+if object_id('tempdb..#YR_EDF2') is not null drop table #YR_EDF2
+		SELECT DISTINCT asofdate as YR
+		INTO #YR_EDF2
+		from OBLIGOR_HISTORY_ALL
+		where WHL_RET_TREATMENT_ADJUSTED='whl'
+		and asofdate between '1/31/2001' and '1/31/2011'
+		and Default_Ind_fixed<>1
+		and ACQUIRED_ACCT_EXCLUDE_IND=0
+		and SUB_SEGMENTATION_ALL IN ('Middle Market','Mid/Large Corp','C&I','CEB')
+		group by  asofdate
+-- 121
+
+--Retail Percentiles
+if object_id('tempdb..#Exp1') is not null drop table #Exp1
+		select asofdate as YR, WHL_RET_TREATMENT_ADJUSTED,net_book_balance,net_exposure
+		into #Exp1
+		from OBLIGOR_HISTORY_ALL
+		where WHL_RET_TREATMENT_ADJUSTED='RET'
+		and asofdate between '1/31/2001' and '1/31/2011'
+		and Default_Ind_fixed<>1
+		and ACQUIRED_ACCT_EXCLUDE_IND=0
+-- 3499436
+
+--CALCULATE Percentiles
+if object_id('tempdb..#p_Retail') is not null drop table #p_Retail
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P1,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P5,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P10,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P25,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P50,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P75,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P90,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P95,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp1 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp1 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P99
+	into #p_Retail
+		FROM #YR_EDF2 AS Y
+		order by YR			
+--121
+
+--CI_Other Exposure		
+if object_id('tempdb..#Exp2') is not null drop table #Exp2
+		select asofdate as YR, SUB_SEGMENTATION_ALL,net_book_balance,net_exposure
+		into #Exp2
+		from OBLIGOR_HISTORY_ALL
+		where WHL_RET_TREATMENT_ADJUSTED='whl'
+		and asofdate between '1/31/2001' and '1/31/2011'
+		and Default_Ind_fixed<>1
+		and ACQUIRED_ACCT_EXCLUDE_IND=0
+		and SUB_SEGMENTATION_ALL IN ('C&I') 
+-- 195164
+
+--CALCULATE Percentiles
+if object_id('tempdb..#p_CIOther') is not null drop table #p_CIOther
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P1,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P5,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P10,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P25,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P50,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P75,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P90,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P95,
+
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P99
+	into #p_CIOther
+			FROM #YR_EDF2 AS Y
+			order by YR
+--121
+			
+--CEB Exposure
+if object_id('tempdb..#Exp3') is not null drop table #Exp3
+		select asofdate as YR, SUB_SEGMENTATION_ALL,net_book_balance,net_exposure
+		into #Exp3
+		from OBLIGOR_HISTORY_ALL
+		where WHL_RET_TREATMENT_ADJUSTED='whl'
+		and asofdate between '1/31/2001' and '1/31/2011'
+		and Default_Ind_fixed<>1
+		and ACQUIRED_ACCT_EXCLUDE_IND=0
+		and SUB_SEGMENTATION_ALL IN ('CEB') 
+-- 189988
+
+--CALCULATE Percentiles
+if object_id('tempdb..#p_CEB') is not null drop table #p_CEB
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P1,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P5,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P10,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P25,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P50,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P75,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P90,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P95,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P99
+	into #p_CEB
+			FROM #YR_EDF2 AS Y
+			order by YR
+	--121		
+--Middle Market Exposure
+if object_id('tempdb..#Exp4') is not null drop table #Exp4
+		select asofdate as YR, SUB_SEGMENTATION_ALL,net_book_balance,net_exposure
+		into #Exp4
+		from OBLIGOR_HISTORY_ALL
+		where WHL_RET_TREATMENT_ADJUSTED='whl'
+		and asofdate between '1/31/2001' and '1/31/2011'
+		and Default_Ind_fixed<>1
+		and ACQUIRED_ACCT_EXCLUDE_IND=0
+		and SUB_SEGMENTATION_ALL IN ('Middle Market') 
+-- 147642
+
+--CALCULATE Percentiles
+if object_id('tempdb..#p_MM') is not null drop table #p_MM
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P1,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P5,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P10,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P25,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P50,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P75,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P90,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P95,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P99
+	into #p_MM
+			FROM #YR_EDF2 AS Y
+			order by YR
+--121
+			
+--Mid/Large-Corp Expsure
+if object_id('tempdb..#Exp5') is not null drop table #Exp5
+		select asofdate as YR, SUB_SEGMENTATION_ALL,net_book_balance,net_exposure
+		into #Exp5
+		from OBLIGOR_HISTORY_ALL
+		where WHL_RET_TREATMENT_ADJUSTED='whl'
+		and asofdate between '1/31/2001' and '1/31/2011'
+		and Default_Ind_fixed<>1
+		and ACQUIRED_ACCT_EXCLUDE_IND=0
+		and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') 
+-- 37401
+
+--CALCULATE Percentiles
+if object_id('tempdb..#p_MidCorp') is not null drop table #p_MidCorp
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P1,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P5,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P10,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P25,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 50 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P50,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P75,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P90,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 95 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 5 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P95,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #Exp5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #Exp5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P99
+	into #p_MidCorp
+			FROM #YR_EDF2 AS Y
+			order by YR			
+--121
+			
+--joining all
+select a.YR,a.p1,a.p5,a.p10,a.p25,a.p50,a.p75,a.p90,a.p95,a.p99,
+b.p1,b.p5,b.p10,b.p25,b.p50,b.p75,b.p90,b.p95,b.p99,
+c.p1,c.p5,c.p10,c.p25,c.p50,c.p75,c.p90,c.p95,c.p99,
+d.p1,d.p5,d.p10,d.p25,d.p50,d.p75,d.p90,d.p95,d.p99,
+e.p1,e.p5,e.p10,e.p25,e.p50,e.p75,e.p90,e.p95,e.p99
+from #p_Retail a
+left join #p_CIOther b
+on a.yr=b.yr
+left join #p_CEB c
+on a.yr=c.yr
+left join #p_MM d
+on a.yr=d.yr
+left join #p_MidCorp e
+on a.yr=e.yr
+
+---11. distribution on the number of months 
+select StatementMonths, COUNT(*)counts		
+from  RISK_ANALYST_DATA a
+join #temp_MidCorp_Obligors b
+on a.entity_ID=b.ENTITY_ID
+WHERE Violation_Flag=0 
+AND isnull(TotalAssets,0)-isnull(TotalLiabs,0)-ISNULL(TotalNetWorth,0)=0
+group by StatementMonths		
+order by StatementMonths
+
+---12. distribution of statements by yr
+select YEAR(statementdate),count(*)as statements
+from RISK_ANALYST_DATA a
+join #temp_MidCorp_Obligors b
+on a.entity_ID=b.ENTITY_ID
+where MOODYS_DISTINCT_IND=1 AND statementdate<='1/31/2011'
+group by YEAR(statementdate)
+
+--13a. Match Rate over time
+
+--all filtered
+select asofdate,count(*)
+from OBLIGOR_HISTORY_ALL a
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+group by asofdate
+order by asofdate
+
+--Matched (3-18)
+select asofdate,count(distinct(a.entity_id))
+from OBLIGOR_HISTORY_ALL a
+join  RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID 
+join #temp_MidCorp_Obligors c
+on a.entity_ID=c.ENTITY_ID
+where asofdate>statementdate and DATEDIFF(mm,statementdate,asofdate)between 3 and 18
+and WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate between '1/31/2001' and '1/31/2011'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND=0
+and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+group by asofdate
+order by asofdate
+
+--13b. Statement Age Distribution
+--drop table #Recent_Stmt2
+if OBJECT_ID('tempdb..#Recent_Stmt2') is not null drop table #Recent_Stmt2
+select a.entity_ID,asofdate, SUB_SEGMENTATION_ALL,DEFAULT_1YR_IND_fixed,Max(statementdate)as Recent_Stmt_Date
+into #Recent_Stmt2
+from  #temp_monthly a
+join  RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID 
+where asofdate>statementdate and DATEDIFF(mm,statementdate,asofdate)>0
+group by a.entity_ID,asofdate,SUB_SEGMENTATION_ALL,DEFAULT_1YR_IND_fixed
+--34784
+
+--drop table #Recent_Stmt3
+if OBJECT_ID('tempdb..#Recent_Stmt3') is not null drop table #Recent_Stmt3
+select *, DATEDIFF(mm,Recent_Stmt_Date,asofdate)as Statement_Age,
+Stmt_Staleness=
+case   	when DATEDIFF(mm,Recent_Stmt_Date,asofdate) <3 then '1: <3m'
+		when DATEDIFF(mm,Recent_Stmt_Date,asofdate) <= 6 then '2: 3-6m'
+		when DATEDIFF(mm,Recent_Stmt_Date,asofdate) <= 12 then '3: 6-12m'
+		when DATEDIFF(mm,Recent_Stmt_Date,asofdate) <= 18 then '4: 12-18m'
+		else '5: >18m'
+		end
+into #Recent_Stmt3
+from #Recent_Stmt2
+--34784
+
+select asofdate,Stmt_Staleness, COUNT(*)as Obs
+from #Recent_Stmt3
+group by asofdate,Stmt_Staleness
+order by asofdate
+
+
+---14. Missing Industry info over time
+--Missing Naics
+select asofdate,count(*)
+from OBLIGOR_HISTORY_ALL a
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+--and asofdate between '1/31/2001' and '1/31/2011'
+--and Default_Ind_fixed<>1
+--and Acquired_Acct is null
+--and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and UPDATED_NAICS is null
+group by asofdate
+order by asofdate
+
+--All
+select asofdate,count(*)
+from OBLIGOR_HISTORY_ALL a
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+--and asofdate between '1/31/2001' and '1/31/2011'
+--and Default_Ind_fixed<>1
+--and Acquired_Acct is null
+--and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+group by asofdate
+order by asofdate
+
+
+--15.Impact of cure window
+
+--Using  12month cure window
+if OBJECT_ID('tempdb..#wCure') is not null drop table #wCure
+select 
+      asofdate, 
+      COUNT(*)as Obligor_Months, 
+      sum(CAST(DEFAULT_1YR_IND_fixed AS INT)) as New_Def1yr
+into #wCure      
+from OBLIGOR_HISTORY_ALL
+where 
+      SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+      and WHL_RET_TREATMENT_ADJUSTED='whl'
+      and asofdate between '1/31/2001' and '1/31/2011'
+      and Default_Ind_fixed<>1
+      and ACQUIRED_ACCT_EXCLUDE_IND=0 
+group by asofdate
+order by asofdate
+
+
+--121
+
+--Without cure window
+if OBJECT_ID('tempdb..#woCure') is not null drop table #woCure
+select 
+      asofdate, 
+      COUNT(*)as OLD_Obligor_Months, 
+      sum(CAST (DEFAULT_1YR_IND AS INT))as OLD_Def1yr
+into #woCure      
+from OBLIGOR_HISTORY_ALL
+where 
+      SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+      and WHL_RET_TREATMENT_ADJUSTED='whl'
+      and asofdate between '1/31/2001' and '1/31/2011'
+      and DEFAULT_IND <>1
+      and ACQUIRED_ACCT_EXCLUDE_IND=0 
+group by asofdate
+order by asofdate
+
+--121
+
+Select A.asofdate,A.Obligor_Months,A.New_Def1yr,B.OLD_Obligor_Months,B.OLD_Def1yr
+from #wCure a
+join #woCure b
+on a.asofdate=b.asofdate
+
+
+------------------------------------------------------------------------------------------------------
+--------------------------V. Final Dataset Summary Stats---------------------------------
+------------------------------------------------------------------------------------------
+
+--1. Overall Summary
+select count(*)as Monthly_Observations, COUNT(distinct(entity_ID)) as Obligors_aggregate
+from MidCorp_Statements_forCCA
+
+Select COUNT(*)as Statements_aggregate
+from MidCorp_Statements_forFSO
+
+Select COUNT(*)as Statements_monthly
+from MidCorp_Statements_forCCA
+
+select COUNT(distinct(a.entity_ID)) as defaults_aggregate
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+where DEFAULT_1YR_IND_fixed=1
+
+select COUNT(a.entity_ID) as defaults_observations
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+where DEFAULT_1YR_IND_fixed=1
+
+
+--2b. Industry (NAICS) Distribution - Obligors and defaults
+--all
+if OBJECT_ID('tempdb..#NAICS_All') is not null drop table #NAICS_All
+select NAICS_SECTOR_NM,COUNT(*) as All_Statements
+into #NAICS_All
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+group by NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM 
+--19
+
+--defaults
+if OBJECT_ID('tempdb..#NAICS_Def') is not null drop table #NAICS_Def
+select NAICS_SECTOR_NM,COUNT(*) as Defaulted_Statements
+into #NAICS_Def
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+where DEFAULT_1YR_IND_fixed=1
+group by NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM 
+--8
+
+select a.NAICS_SECTOR_NM,All_Statements,Defaulted_Statements
+from #NAICS_All a
+left join #NAICS_Def b
+on a.NAICS_SECTOR_NM=b.NAICS_SECTOR_NM
+
+
+--3. Sales Distribution - Obligors and defaults (USING JAN 2011 as Base Year)
+--DROP TABLE #MidCorp_Sales
+if OBJECT_ID('tempdb..#MidCorp_Sales') is not null drop table #MidCorp_Sales
+select a.*,c.ADJUSTED_ZIP_CD,c.asofdate, 
+c.DEFAULT_1YR_IND_fixed,Sales_2011=ISNULL(a.NetSales,0)*(220.223/B.CPI_USD),
+Sales_2011_Bucket=case
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<1000000 then 'a:<1Bln'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<2000000 then 'b:1Bln-2Bln'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<5000000 then 'c:2Bln-5Bln'	
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)>=5000000 then 'd:>5Bln'
+else 'e: Missing'
+end,
+Assets_2011_Bucket=case
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)<1000000 then 'a:<1Bln'
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)<2000000 then 'b:1Bln-2Bln'
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)<5000000 then 'c:2Bln-5Bln'	
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)>=5000000 then 'd:>5Bln'
+else 'e: Missing'
+end
+into #MidCorp_Sales
+from MidCorp_Statements_forCCA a
+left join LOOKUP_CPI_INDEX_19MAY2011 B
+ON YEAR(A.STATEMENTDATE)=YEAR(B.DATE)
+AND MONTH(A.STATEMENTDATE)=MONTH(B.DATE)
+join OBLIGOR_HISTORY_ALL c
+on a.entity_ID=c.ENTITY_ID
+and a.[Current_Date]=c.asofdate 
+--32794
+
+--all
+if OBJECT_ID('tempdb..#Sales_All') is not null drop table #Sales_All
+select Sales_2011_Bucket, COUNT(*)as All_Observations
+into #Sales_All
+from #MidCorp_Sales
+group by Sales_2011_Bucket
+order by Sales_2011_Bucket
+--4
+
+--defaulted
+if OBJECT_ID('tempdb..#Sales_Def') is not null drop table #Sales_Def
+select Sales_2011_Bucket, COUNT(*) as Defaulted_Observations
+into #Sales_Def
+from #MidCorp_Sales
+where DEFAULT_1YR_IND_fixed=1
+group by Sales_2011_Bucket
+order by Sales_2011_Bucket
+--4
+
+select A.Sales_2011_Bucket,All_Observations,Defaulted_Observations
+from #Sales_All a
+join #Sales_Def b
+on a.Sales_2011_Bucket=b.Sales_2011_Bucket
+
+--4. # of observations by year
+--drop table #temp_defaults
+select asofdate,COUNT(distinct(a.entity_ID)) as All_Observations, 
+SUM(CAST(DEFAULT_1YR_IND_fixed AS INT))as Defaulted_Observations
+--into #temp_defaults
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+group by asofdate
+order by asofdate
+
+
+--5. Statement Distribution
+--all
+--drop table #All
+if OBJECT_ID('tempdb..#All') is not null drop table #All
+select year(statementdate)as Year, COUNT(*)as All_Statements
+into #All
+from MidCorp_Statements_forCCA
+group by year(statementdate)
+order by year(statementdate)
+--12
+
+--defaulted
+
+--drop table #Def
+if OBJECT_ID('tempdb..#Def') is not null drop table #Def
+select year(statementdate)as Year, COUNT(*)as Defaulted_Statements
+into #Def
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+where DEFAULT_1YR_IND_fixed=1
+group by year(statementdate)
+order by year(statementdate)
+--12
+
+select a.year, All_Statements,Defaulted_Statements
+from #All a
+left join #Def b
+on a.year=b.year
+order by a.year
+
+--Region Distribution
+--all
+if object_id('tempdb..#Summary_Region_All') is not null  drop table #Summary_Region_All
+SELECT b.*,region=
+CASE 
+WHEN CRD_Region='New England' Or CRD_Region='Mid Atlantic' Or CRD_Region='North Central' 
+THEN CRD_Region 
+ELSE 'All Other' 
+END
+into #Summary_Region_All
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+LEFT JOIN LOOKUP_free_zipcode_DB_Primary c
+ON b.ADJUSTED_ZIP_CD=c.ZipCode_5dgt 
+LEFT JOIN LOOKUP_StateToRegion_Map d
+ON c.State=d.State
+--32794
+
+if OBJECT_ID('tempdb..#region_all') is not null drop table #region_all
+select region,COUNT(*) as All_Observations
+into #region_all
+from #Summary_Region_All
+group by region
+order by region
+--4
+
+
+----defaults
+if OBJECT_ID('tempdb..#region_Defaulted') is not null drop table #region_Defaulted
+select region,COUNT(*) as Defaulted_Observations
+into #region_Defaulted
+from #Summary_Region_All
+where DEFAULT_1YR_IND_fixed=1
+group by region
+order by region
+--4
+
+select a.region,All_Observations,Defaulted_Observations
+from #region_all a
+left join #region_Defaulted b
+on a.region=b.region
+
+---------VI.Comparing Universe vs. Final sample vs. Performance Comparison Sample.---(some of the stats for validation set produced in section V)
+-------------------------------------------------------------------------------------------------------------------------
+
+
+--Industry (NAICS) Distribution
+--Universe
+if object_id('tempdb..#Universe') is not null  drop table #Universe
+select NAICS_SECTOR_NM,COUNT(distinct(entity_id))as Total_Sample
+into #Universe
+from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+group by NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM  
+--20
+
+--Final Sample
+if object_id('tempdb..#validation') is not null  drop table #validation
+select NAICS_SECTOR_NM,COUNT(distinct(a.entity_id)) as Validation_Sample
+into #validation
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+group by NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM 
+--19
+
+--Performance Comparison Sample
+if object_id('tempdb..#Performance') is not null  drop table #Performance
+select NAICS_SECTOR_NM,COUNT(distinct(a.entity_id)) as Performance_Sample
+into #Performance
+from MidCorp_Modeling_Monthly a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.asofdate=b.asofdate
+where Quant_Engine_Rating is not null and 
+[Cumulative_1_Yr_EDF] is not null and 
+[Cumulative_1_Yr_FSO_EDF] is not null and 
+[zscore5] is not null
+group by NAICS_SECTOR_NM
+order by NAICS_SECTOR_NM 
+--18
+
+select a.NAICS_SECTOR_NM,Total_Sample,Validation_Sample,Performance_Sample
+from #Universe a
+left join #validation b
+on a.NAICS_SECTOR_NM=b.NAICS_SECTOR_NM
+left join #Performance c
+on a.NAICS_SECTOR_NM=c.NAICS_SECTOR_NM
+order by Total_Sample desc
+
+--Exposure Distribution
+--Universe
+if object_id('tempdb..#YR_EDF2A') is not null drop table #YR_EDF2A
+		SELECT DISTINCT asofdate as YR
+		INTO #YR_EDF2A
+		from OBLIGOR_HISTORY_ALL
+		where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+		group by  asofdate,SUB_SEGMENTATION_ALL
+-- 172		
+if object_id('tempdb..#DEFREP_RATIOS2') is not null drop table #DEFREP_RATIOS2
+		select asofdate as YR, SUB_SEGMENTATION_ALL,net_book_balance,net_exposure
+		into #DEFREP_RATIOS2
+		from OBLIGOR_HISTORY_ALL
+		where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp') 
+-- 47938
+
+--CALCULATE Percentiles
+if OBJECT_ID('tempdb..#All_Percentiles') is not null drop table #All_Percentiles
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P1,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P5,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P10,
+	
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P25,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P50,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P75,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P90,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P95,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS2 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS All_P99
+			into #All_Percentiles
+			FROM #YR_EDF2A AS Y
+			order by YR 
+--172
+
+--Final dataset
+if object_id('tempdb..#YR_EDF4') is not null drop table #YR_EDF4
+		SELECT DISTINCT b.asofdate as YR
+		INTO #YR_EDF4
+		from MidCorp_Statements_forCCA a
+		join OBLIGOR_HISTORY_ALL b
+		on a.entity_ID=b.ENTITY_ID
+		and a.[Current_Date]=b.asofdate
+-- 121		
+if object_id('tempdb..#DEFREP_RATIOS4') is not null drop table #DEFREP_RATIOS4
+		select asofdate as YR, SUB_SEGMENTATION_ALL,net_book_balance,net_exposure
+		into #DEFREP_RATIOS4
+		from MidCorp_Statements_forCCA a
+		join OBLIGOR_HISTORY_ALL b
+		on a.entity_ID=b.ENTITY_ID
+		and a.[Current_Date]=b.asofdate
+-- 32794
+
+--CALCULATE Percentiles
+if OBJECT_ID('tempdb..#Validation_Percentiles') is not null drop table #Validation_Percentiles
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P1,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P5,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P10,
+	
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P25,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P50,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P75,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P90,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P95,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS4 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Validation_P99
+			into #Validation_Percentiles
+			FROM #YR_EDF4 AS Y
+			order by YR 
+
+--121
+
+--Performance dataset
+if object_id('tempdb..#YR_EDF5') is not null drop table #YR_EDF5
+		SELECT DISTINCT b.asofdate as YR
+		INTO #YR_EDF5
+		from MidCorp_Modeling_Monthly a
+		join OBLIGOR_HISTORY_ALL b
+		on a.entity_ID=b.ENTITY_ID
+		and a.asofdate=b.asofdate
+		where Quant_Engine_Rating is not null and 
+		[Cumulative_1_Yr_EDF] is not null and 
+		[Cumulative_1_Yr_FSO_EDF] is not null and 
+		[zscore5] is not null
+-- 44		
+if object_id('tempdb..#DEFREP_RATIOS5') is not null drop table #DEFREP_RATIOS5
+		select a.AsofDate as YR, b.SUB_SEGMENTATION_ALL,a.net_book_balance,a.net_exposure
+		into #DEFREP_RATIOS5
+		from MidCorp_Modeling_Monthly a
+		join OBLIGOR_HISTORY_ALL b
+		on a.entity_ID=b.ENTITY_ID
+		and a.asofdate=b.asofdate
+		where Quant_Engine_Rating is not null and 
+		[Cumulative_1_Yr_EDF] is not null and 
+		[Cumulative_1_Yr_FSO_EDF] is not null and 
+		[zscore5] is not null
+-- 15509
+
+--CALCULATE Percentiles
+if OBJECT_ID('tempdb..#Performance_Percentiles') is not null drop table #Performance_Percentiles
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P1,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P5,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P10,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P25,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P50,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P75,
+	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P90,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P95,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS5 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS Performance_P99
+			into #Performance_Percentiles
+			FROM #YR_EDF5 AS Y
+			order by YR 
+
+--44
+
+select A.YR,
+All_p1,All_p5,All_p10,All_p25,All_p50,All_p75,All_p90,All_p95,All_p99,
+Validation_p1,Validation_p5,Validation_p10,Validation_p25,Validation_p50,Validation_p75,Validation_p90,Validation_p95,Validation_p99,
+Performance_p1,Performance_p5,Performance_p10,Performance_p25,Performance_p50,Performance_p75,Performance_p90,Performance_p95,Performance_p99
+from #All_Percentiles a
+left join #Validation_Percentiles b
+on a.yr=b.yr
+left join  #Performance_Percentiles c
+on a.yr=c.yr
+
+
+--Default rates
+--Universe All
+if object_id('tempdb..#Def_All') is not null drop table #Def_All
+SELECT asofdate,count(distinct(entity_ID)) as obligors,SUM(CAST(DEFAULT_1YR_IND_fixed AS INT)) as Defaults
+into #Def_All
+from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and Default_Ind_fixed<>1
+group by asofdate	
+order by asofdate	
+--172
+
+--Validation dataset
+if object_id('tempdb..#Def_Validation') is not null drop table #Def_Validation
+SELECT asofdate,count(distinct(b.entity_ID)) as obligors,SUM(CAST(DEFAULT_1YR_IND_fixed AS INT)) as Defaults	
+into #Def_Validation
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+group by asofdate	
+order by asofdate
+--121
+
+--Performance dataset
+if object_id('tempdb..#Def_Performance') is not null drop table #Def_Performance
+SELECT a.AsofDate,count(distinct(a.entity_ID)) as obligors,SUM(CAST(a.DEFAULT_1YR_IND_fixed AS INT)) as Defaults	
+into #Def_Performance
+from MidCorp_Modeling_Monthly a
+		join OBLIGOR_HISTORY_ALL b
+		on a.entity_ID=b.ENTITY_ID
+		and a.asofdate=b.asofdate
+		where Quant_Engine_Rating is not null and 
+		[Cumulative_1_Yr_EDF] is not null and 
+		[Cumulative_1_Yr_FSO_EDF] is not null and 
+		[zscore5] is not null
+group by a.AsofDate	
+order by a.asofdate
+--44
+
+select a.asofdate,a.obligors,a.Defaults,b.obligors,b.Defaults,c.obligors,c.Defaults
+from #Def_All a
+left join #Def_Validation b
+on a.asofdate=b.asofdate
+left join #Def_Performance c
+on a.asofdate=c.asofdate
+
+
+--Region Distribution
+
+--Universe
+
+if object_id('tempdb..#Summary_Region_Universe') is not null  drop table #Summary_Region_Universe
+SELECT distinct (a.entity_id),region=
+CASE 
+WHEN CRD_Region='New England' Or CRD_Region='Mid Atlantic' Or CRD_Region='North Central' 
+THEN CRD_Region 
+ELSE 'All Other' 
+END
+into #Summary_Region_Universe
+from OBLIGOR_HISTORY_ALL a
+LEFT JOIN LOOKUP_free_zipcode_DB_Primary b
+ON a.ADJUSTED_ZIP_CD=b.ZipCode_5dgt 
+LEFT JOIN LOOKUP_StateToRegion_Map c
+ON b.State=c.State
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and
+LTRIM(rtrim(entity_id))+'_'+LTRIM(rtrim(asofdate))
+in
+(
+select LTRIM(rtrim(entity_id))+'_'+max(LTRIM(rtrim(asofdate))) from OBLIGOR_HISTORY_ALL
+where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+group by entity_id
+)
+--1233
+ 
+--Mid Corp Final sample
+if object_id('tempdb..#Summary_Region_Sample') is not null  drop table #Summary_Region_Sample
+SELECT distinct (a.entity_id),region=
+CASE 
+WHEN CRD_Region='New England' Or CRD_Region='Mid Atlantic' Or CRD_Region='North Central' 
+THEN CRD_Region 
+ELSE 'All Other' 
+END
+into #Summary_Region_Sample
+from MidCorp_Statements_forCCA a
+left join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+LEFT JOIN LOOKUP_free_zipcode_DB_Primary c
+ON b.ADJUSTED_ZIP_CD=c.ZipCode_5dgt 
+LEFT JOIN LOOKUP_StateToRegion_Map d
+ON c.State=d.State
+where
+LTRIM(rtrim(a.entity_ID))+'_'+LTRIM(rtrim([Current_Date]))
+in
+(
+select LTRIM(rtrim(entity_id))+'_'+max(LTRIM(rtrim([Current_Date]))) from MidCorp_Statements_forCCA
+group by entity_id
+)
+--811
+
+
+--Mid Corp Performance Final sample
+if object_id('tempdb..#Summary_Region_Performance_Sample') is not null  drop table #Summary_Region_Performance_Sample
+SELECT distinct (a.entity_id),region=
+CASE 
+WHEN CRD_Region='New England' Or CRD_Region='Mid Atlantic' Or CRD_Region='North Central' 
+THEN CRD_Region 
+ELSE 'All Other' 
+END
+into #Summary_Region_Performance_Sample
+from MidCorp_Modeling_Monthly a
+join OBLIGOR_HISTORY_ALL b
+		on a.entity_ID=b.ENTITY_ID
+		and a.asofdate=b.asofdate
+LEFT JOIN LOOKUP_free_zipcode_DB_Primary c
+ON b.ADJUSTED_ZIP_CD=c.ZipCode_5dgt 
+LEFT JOIN LOOKUP_StateToRegion_Map d
+ON c.State=d.State
+where Quant_Engine_Rating is not null and 
+		[Cumulative_1_Yr_EDF] is not null and 
+		[Cumulative_1_Yr_FSO_EDF] is not null and 
+		[zscore5] is not null
+and LTRIM(rtrim(a.entity_ID))+'_'+LTRIM(rtrim(a.AsofDate))
+in
+(
+select LTRIM(rtrim(entity_id))+'_'+max(LTRIM(rtrim(asofdate))) from MidCorp_Modeling_Monthly
+where Quant_Engine_Rating is not null and 
+		[Cumulative_1_Yr_EDF] is not null and 
+		[Cumulative_1_Yr_FSO_EDF] is not null and 
+		[zscore5] is not null
+group by entity_id
+) 
+--649
+
+
+---Universe
+if OBJECT_ID('tempdb..#region_all_Universe') is not null drop table #region_all_Universe
+select region,COUNT(*) as All_Mid_Corp_Obligors
+into #region_all_Universe
+from #Summary_Region_Universe
+group by region
+order by region
+--4
+
+----Mid Corp Sample
+if OBJECT_ID('tempdb..#region_Sample') is not null drop table #region_Sample
+select region,COUNT(*) as Final_Obligors
+into #region_Sample
+from #Summary_Region_Sample
+group by region
+order by region
+--4
+
+----Mid Corp Performance Sample
+if OBJECT_ID('tempdb..#region_Sample_Performance') is not null drop table #region_Sample_Performance
+select region,COUNT(*) as Performance_Obligors
+into #region_Sample_Performance
+from #Summary_Region_Performance_Sample
+group by region
+order by region
+--4
+
+select a.region,All_Mid_Corp_Obligors,Final_Obligors,Performance_Obligors
+from #region_all_Universe a
+left join #region_Sample b
+on a.region=b.region
+left join #region_Sample_Performance c
+on a.region=c.region
+
+---Sales Distribution
+
+-------Universe Sale Bucketing (Using Maximum Statament year)
+
+if OBJECT_ID('tempdb..#MidCorp_All_Statement_Sample') is not null drop table #MidCorp_All_Statement_Sample
+select Distinct a.entity_ID,STATEMENTDATE,NetSales,
+Sales_2011=ISNULL(a.NetSales,0)*(220.223/B.CPI_USD),
+Sales_2011_Bucket=case
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<1000000 then 'a:<1Bln'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<2000000 then 'b:1Bln-2Bln'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<5000000 then 'c:2Bln-5Bln'	
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)>=5000000 then 'd:>5Bln'
+else 'e: Missing'
+end
+into #MidCorp_All_Statement_Sample
+from RISK_ANALYST_DISTINCT_RATIO a
+left join LOOKUP_CPI_INDEX_19MAY2011 B
+ON YEAR(A.STATEMENTDATE)=YEAR(B.DATE)
+AND MONTH(A.STATEMENTDATE)=MONTH(B.DATE)
+--159088
+
+if OBJECT_ID('tempdb..#Mid_corp_All_Obligors') is not null drop table #Mid_corp_All_Obligors
+select distinct entity_id 
+into #Mid_corp_All_Obligors
+from OBLIGOR_HISTORY_ALL where SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+--1233
+
+select Sales_2011_Bucket,COUNT(*)'All_Mid_Corp_Obligors' from 
+	(
+	select distinct a.entity_id,Sales_2011_Bucket from #Mid_corp_All_Obligors a left outer join 
+		(
+		select entity_ID,statementdate,Sales_2011_Bucket
+		from #MidCorp_All_Statement_Sample
+		where ltrim(rtrim(entity_id))+'_'+(ltrim(RTRIM(statementdate))) in
+				(
+				select ltrim(rtrim(entity_id))+'_'+Max(ltrim(RTRIM(statementdate)))
+				from #MidCorp_All_Statement_Sample 
+				group by entity_ID
+				)
+		)b on a.entity_id=b.entity_id
+	)c
+group by Sales_2011_Bucket order by Sales_2011_Bucket
+
+
+
+--Final Sample Sale Bucketing (Using Maximum Statament year)
+
+if OBJECT_ID('tempdb..#MidCorp_Final_Statement_Sample') is not null drop table #MidCorp_Final_Statement_Sample
+select Distinct a.entity_ID,STATEMENTDATE,NetSales,
+Sales_2011=ISNULL(a.NetSales,0)*(220.223/B.CPI_USD),
+Sales_2011_Bucket=case
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<1000000 then 'a:<1Bln'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<2000000 then 'b:1Bln-2Bln'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<5000000 then 'c:2Bln-5Bln'	
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)>=5000000 then 'd:>5Bln'
+else 'e: Missing'
+end
+into #MidCorp_Final_Statement_Sample
+from MidCorp_Statements_forCCA a
+left join LOOKUP_CPI_INDEX_19MAY2011 B
+ON YEAR(A.STATEMENTDATE)=YEAR(B.DATE)
+AND MONTH(A.STATEMENTDATE)=MONTH(B.DATE)
+
+select Sales_2011_Bucket,COUNT(*)'Final Sample Obligors' from 
+	(
+	select entity_ID,Sales_2011_Bucket
+	from #MidCorp_Final_Statement_Sample
+	where ltrim(rtrim(entity_id))+'_'+(ltrim(RTRIM(statementdate))) in
+			(
+			select ltrim(rtrim(entity_id))+'_'+Max(ltrim(RTRIM(statementdate)))
+			from #MidCorp_Final_Statement_Sample
+			group by entity_ID
+			)
+	)a
+group by Sales_2011_Bucket order by Sales_2011_Bucket
+
+--Performance Sample Sale Bucketing (Using Maximum Statament year)
+
+if OBJECT_ID('tempdb..#MidCorp_Performance_Statement_Sample') is not null drop table #MidCorp_Performance_Statement_Sample
+select Distinct a.entity_ID,Bal_stmt_date,
+Sales_2011_Bucket=case
+when ISNULL(NetSales,0)*(220.223/B.CPI_USD)<1000000 then 'a:<1Bln'
+when ISNULL(NetSales,0)*(220.223/B.CPI_USD)<2000000 then 'b:1Bln-2Bln'
+when ISNULL(NetSales,0)*(220.223/B.CPI_USD)<5000000 then 'c:2Bln-5Bln'	
+when ISNULL(NetSales,0)*(220.223/B.CPI_USD)>=5000000 then 'd:>5Bln'
+else 'e: Missing'
+end
+into #MidCorp_Performance_Statement_Sample
+from MidCorp_Modeling_Monthly a
+left join RISK_ANALYST_DISTINCT_RATIO C
+on a.entity_id=c.entity_id
+and a.Bal_stmt_date=c.statementdate
+left join LOOKUP_CPI_INDEX_19MAY2011 B
+ON YEAR(A.Bal_stmt_date)=YEAR(B.DATE)
+AND MONTH(A.Bal_stmt_date)=MONTH(B.DATE)
+where Quant_Engine_Rating is not null and 
+[Cumulative_1_Yr_EDF] is not null and 
+[Cumulative_1_Yr_FSO_EDF] is not null and 
+a.[zscore5] is not null
+
+
+select Sales_2011_Bucket,COUNT(*)'Performance Sample Obligors' from 
+	(
+	select entity_ID,Sales_2011_Bucket
+	from #MidCorp_Performance_Statement_Sample
+	where ltrim(rtrim(entity_id))+'_'+(ltrim(RTRIM(Bal_stmt_date))) in
+			(
+			select ltrim(rtrim(entity_id))+'_'+Max(ltrim(RTRIM(Bal_stmt_date)))
+			from #MidCorp_Performance_Statement_Sample
+			group by entity_ID
+			)
+	)a
+group by Sales_2011_Bucket order by Sales_2011_Bucket
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+--------VII.RiskCalc Comparision to MidLarge Corp Sample------------------
+
+----1. Industry (NDY) Distribution - Obligors and defaults
+--all
+if object_id('tempdb..#ndy_all') is not null drop table #ndy_all
+select b.MOODYS_INDUSTRY_CLASS,COUNT(*) as All_Statements
+into #ndy_all
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+group by b.MOODYS_INDUSTRY_CLASS
+--14
+
+
+----defaults
+if object_id('tempdb..#ndy_def') is not null drop table #ndy_def
+select b.MOODYS_INDUSTRY_CLASS,COUNT(*) as Def_Statements
+into #ndy_def
+from MidCorp_Statements_forCCA a
+join OBLIGOR_HISTORY_ALL b
+on a.entity_ID=b.ENTITY_ID
+and a.[Current_Date]=b.asofdate
+where DEFAULT_1YR_IND_fixed=1
+group by b.MOODYS_INDUSTRY_CLASS
+--10
+
+select A.MOODYS_INDUSTRY_CLASS,all_statements,Def_Statements
+from #ndy_all a
+left Join #ndy_def b
+on a.MOODYS_INDUSTRY_CLASS=b.MOODYS_INDUSTRY_CLASS
+
+--2. Size Comparison to RC LF-- Diff buckets used
+if object_id('tempdb..#MidCorp_Sales_Comp') is not null drop table #MidCorp_Sales_Comp
+select a.*,c.ADJUSTED_ZIP_CD,c.asofdate, c.DEFAULT_1YR_IND_fixed,Sales_2011=ISNULL(a.NetSales,0)*(220.223/B.CPI_USD),
+Sales_2011_Bucket=case
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<100000 then 'a:less than $100 MM'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<200000 then 'b:$100 to $200 MM'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<300000 then 'c:$200 to $300 MM'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<500000 then 'd:$300 to $500 MM'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<1000000 then 'e:$500 to $1000 MM'	
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)<2000000 then 'f:$1000 to $2000 MM'
+when ISNULL(a.NetSales,0)*(220.223/B.CPI_USD)>=2000000 then 'g:greater than $2000 MM'
+else 'e: Missing'
+end,
+Assets_2011_Bucket=case
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)<200000 then 'a:$100 to $200 MM'
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)<300000 then 'b:$200 to $300 MM'
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)<500000 then 'c:$300 to $500 MM'	
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)<2000000 then 'd:$500 to $2000 MM'
+when ISNULL(a.TotalAssets,0)*(220.223/B.CPI_USD)>=2000000 then 'e:greater than $2000 MM'
+else 'e: Missing'
+end
+into #MidCorp_Sales_Comp
+from MidCorp_Statements_forCCA a
+left join LOOKUP_CPI_INDEX_19MAY2011 B
+ON YEAR(A.STATEMENTDATE)=YEAR(B.DATE)
+AND MONTH(A.STATEMENTDATE)=MONTH(B.DATE)
+join OBLIGOR_HISTORY_ALL c
+on a.entity_ID=c.ENTITY_ID
+and a.[Current_Date]=c.asofdate 
+--32794
+
+--2a.Sales
+--all
+if object_id('tempdb..#sales_AllA') is not null drop table #sales_AllA
+select Sales_2011_Bucket, COUNT(*)as All_Statements
+into #sales_AllA
+from #MidCorp_Sales_Comp
+group by Sales_2011_Bucket
+order by Sales_2011_Bucket
+--3
+
+--defaulted
+if object_id('tempdb..#sales_DefA') is not null drop table #sales_DefA
+select Sales_2011_Bucket, COUNT(*)as Def_Statements
+into #sales_DefA
+from #MidCorp_Sales_Comp
+where DEFAULT_1YR_IND_fixed=1
+group by Sales_2011_Bucket
+order by Sales_2011_Bucket
+--3
+
+select a.Sales_2011_Bucket,All_Statements,Def_Statements
+from #sales_AllA a
+left join #sales_DefA b
+on a.Sales_2011_Bucket=b.Sales_2011_Bucket
+order by a.Sales_2011_Bucket
+
+--2a.Assets
+--all
+if object_id('tempdb..#assets_All') is not null drop table #assets_All
+select Assets_2011_Bucket, COUNT(*)as All_Statements
+into #assets_All
+from #MidCorp_Sales_Comp
+group by Assets_2011_Bucket
+order by Assets_2011_Bucket
+--5
+
+--defaulted
+if object_id('tempdb..#assets_def') is not null drop table #assets_def
+select Assets_2011_Bucket, COUNT(*)as Def_Statements
+into #assets_def
+from #MidCorp_Sales_Comp
+where DEFAULT_1YR_IND_fixed=1
+group by Assets_2011_Bucket
+order by Assets_2011_Bucket
+--4
+
+select a.Assets_2011_Bucket,All_Statements,Def_Statements
+from #assets_All a
+left join #assets_Def b
+on a.Assets_2011_Bucket=b.Assets_2011_Bucket
+order by a.Assets_2011_Bucket
+
+------
+
+--Percentile of Ratio Percentiles
+if OBJECT_ID('tempdb..#Percentiles_of_Percentiles') is not null drop table #Percentiles_of_Percentiles
+--a.Percentile_Cng_in_WC_Acrual
+                        SELECT CONVERT(VARCHAR(100), 'Change_in_WC_Accruals') as Title,
+                  (
+                 (SELECT MAX(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Cng_in_WC_Acrual) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Cng_in_WC_Acrual FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Cng_in_WC_Acrual IS NOT NULL
+                        ORDER BY Percentile_Cng_in_WC_Acrual DESC) AS H2)
+                  ) / 2 AS p90
+                  into #Percentiles_of_Percentiles
+                  
+--b.Percentile_EBITDA_Int_Exp
+INSERT INTO #Percentiles_of_Percentiles
+                  SELECT 'EBITDA_Interest_Expense' as Title,
+                  (
+                  (SELECT MAX(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 10 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp) AS H1)
+                  +
+                  (SELECT MIN(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 90 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 25 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp) AS H1)
+                  +
+                  (SELECT MIN(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 75 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 50 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp) AS H1)
+                  +
+                  (SELECT MIN(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 50 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 75 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp) AS H1)
+                  +
+                  (SELECT MIN(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 25 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 90 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp) AS H1)
+                  +
+                  (SELECT MIN(Percentile_EBITDA_Int_Exp) FROM
+                     (SELECT TOP 10 PERCENT Percentile_EBITDA_Int_Exp FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_EBITDA_Int_Exp IS NOT NULL
+                        ORDER BY Percentile_EBITDA_Int_Exp DESC) AS H2)
+                  ) / 2 AS p90      
+                  
+                              
+--c.Percentile_Sales_Growth
+INSERT INTO #Percentiles_of_Percentiles
+                  SELECT 'Sales_Growth' AS TITLE,
+                  (
+                  (SELECT MAX(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Sales_Growth) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Sales_Growth FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Sales_Growth IS NOT NULL
+                        ORDER BY Percentile_Sales_Growth DESC) AS H2)
+                  ) / 2 AS p90
+                  
+--d.Percentile_Change_in_ROA
+INSERT INTO #Percentiles_of_Percentiles
+                  SELECT 'Change_in_ROA' as Title,
+                  (
+                  (SELECT MAX(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                       WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Change_in_ROA) FROM
+                    (SELECT TOP 90 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_ROA) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Change_in_ROA FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_ROA IS NOT NULL
+                        ORDER BY Percentile_Change_in_ROA DESC) AS H2)
+                  ) / 2 AS p90
+                                                
+--e.Percentile_Change_in_Leverage
+insert into #Percentiles_of_Percentiles
+                  SELECT 'Change_in_Leverage' as Title,
+                  (
+                  (SELECT MAX(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Change_in_Leverage) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Change_in_Leverage FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Change_in_Leverage IS NOT NULL
+                        ORDER BY Percentile_Change_in_Leverage DESC) AS H2)
+                  ) / 2 AS p90
+                  
+--f.Percentile_Ttl_Dbt_Ttl_Asst
+insert into #Percentiles_of_Percentiles
+                  SELECT 'Total_Debt_Total_Assets' as Title,
+                  (
+                  (SELECT MAX(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Ttl_Dbt_Ttl_Asst) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Ttl_Dbt_Ttl_Asst FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Ttl_Dbt_Ttl_Asst IS NOT NULL
+                        ORDER BY Percentile_Ttl_Dbt_Ttl_Asst DESC) AS H2)
+                  ) / 2 AS p90
+                  
+--g.Percentile_Csh_and_Equiv_CL
+INSERT INTO #Percentiles_of_Percentiles
+                  SELECT 'Cash_to_CL' as Title,
+                  (
+                  (SELECT MAX(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Csh_and_Equiv_CL) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Csh_and_Equiv_CL FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Csh_and_Equiv_CL IS NOT NULL
+                        ORDER BY Percentile_Csh_and_Equiv_CL DESC) AS H2)
+                  ) / 2 AS p90
+                  
+--h.Percentile_Return_on_Assets
+INSERT INTO #Percentiles_of_Percentiles
+                  SELECT 'Return_on_Assets'  as Title,
+                  (
+                  (SELECT MAX(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Return_on_Assets) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Return_on_Assets FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Return_on_Assets IS NOT NULL
+                        ORDER BY Percentile_Return_on_Assets DESC) AS H2)
+                  ) / 2 AS p90
+                  
+--i.Percentile_Size
+INSERT INTO #Percentiles_of_Percentiles
+                  SELECT 'Size'  as Title,
+                  (
+                  (SELECT MAX(Percentile_Size) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Size) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size DESC) AS H2)
+                  ) / 2 AS p10,
+                  (
+                  (SELECT MAX(Percentile_Size) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Size) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size DESC) AS H2)
+                  ) / 2 AS p25,
+                  (
+                  (SELECT MAX(Percentile_Size) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Size) FROM
+                     (SELECT TOP 50 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size DESC) AS H2)
+                  ) / 2 AS p50, 
+                  (
+                  (SELECT MAX(Percentile_Size) FROM
+                     (SELECT TOP 75 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Size) FROM
+                     (SELECT TOP 25 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size DESC) AS H2)
+                  ) / 2 AS p75,
+                  (
+                  (SELECT MAX(Percentile_Size) FROM
+                     (SELECT TOP 90 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size) AS H1)
+                  +
+                  (SELECT MIN(Percentile_Size) FROM
+                     (SELECT TOP 10 PERCENT Percentile_Size FROM MidCorp_RiskCalcLFM_Output_FSO AS b
+                        WHERE Percentile_Size IS NOT NULL
+                        ORDER BY Percentile_Size DESC) AS H2)
+                  ) / 2 AS p90
+                  
+select * from #Percentiles_of_Percentiles
+
+
+
+
+----------------------------Survey Exclusions----------------------------
+--NOTE: 337 Surveys were original sent. 278 were received and are available in MidCorp_Survey_Responses. Not all belong to mid corp
+--so additional filtering was required.
+
+--1. Survey Count
+select COUNT(*)
+from MidCorp_Survey_Responses
+--278
+
+--2. Mid Corp Survey Responses
+select COUNT(*)
+from MidCorp_Survey_Responses
+where Reason_to_exclude<>'Not MidCorp' or Reason_to_exclude IS NULL 
+--212
+
+--3. Mid Corp Survey Responses-->Responses with Matched Fianancials
+select COUNT(*)
+from MidCorp_Survey_Responses
+where Reason_to_exclude is null
+--170
+
+--4. Mid Corp Survey Responses-->Responses with Matched Fianancials-->Selected subset
+select COUNT(*)
+from MidCorp_Survey_Respon_Selected
+
+------------------------------------------------------------------------------------------
+------------XI. Representativeness of Survey Responses Selected----------------------------
+--Current MidCorp Obligors
+if OBJECT_ID('tempdb..#temp_Curr_MidCorp') is not null drop table #temp_Curr_MidCorp
+select entity_ID,asofdate,SUB_SEGMENTATION_ALL, DEFAULT_1YR_IND_fixed
+into #temp_Curr_MidCorp
+from OBLIGOR_HISTORY_ALL a
+where WHL_RET_TREATMENT_ADJUSTED='whl'
+and asofdate ='1/31/2012'
+and Default_Ind_fixed<>1
+and ACQUIRED_ACCT_EXCLUDE_IND =0
+and SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+--552
+
+--Join Cleaned RiskAnalyst table
+if OBJECT_ID('tempdb..#Curr_MidCorp_Stmt_Matched') is not null drop table #Curr_MidCorp_Stmt_Matched
+select a.entity_ID,asofdate, SUB_SEGMENTATION_ALL,DEFAULT_1YR_IND_fixed,Max(statementdate)as Recent_Stmt_Date
+into #Curr_MidCorp_Stmt_Matched
+from  #temp_Curr_MidCorp a
+join  RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID 
+where asofdate>statementdate and DATEDIFF(mm,statementdate,asofdate)between 3 and 18
+group by a.entity_ID,asofdate,SUB_SEGMENTATION_ALL,DEFAULT_1YR_IND_fixed
+--441
+
+if object_id('tempdb..#MidCorp_Sample_all') is not null drop table #MidCorp_Sample_all
+SELECT a.*,Recent_Stmt_Date, sample_flag=
+case
+when B.Entity_ID is not null then '1'
+else '0'
+end
+into #MidCorp_Sample_all
+FROM OBLIGOR_HISTORY_ALL a
+left join MidCorp_Survey_Respon_Selected b
+on a.entity_id=B.Entity_ID
+left join #Curr_MidCorp_Stmt_Matched c
+on a.entity_id=c.entity_id
+where a.SUB_SEGMENTATION_ALL IN ('Mid/Large Corp')
+and WHL_RET_TREATMENT_ADJUSTED='whl'
+and a.asofdate='1/31/2012'
+and a.Default_Ind_fixed<>1
+and a.ACQUIRED_ACCT_EXCLUDE_IND=0 
+--552
+
+select sample_flag, COUNT(*)
+from #MidCorp_Sample_all
+group by sample_flag
+
+
+-------------------------COMPARE Net Sales---------------------------------------------------
+--Mean, min, max
+select COUNT(*) as Observations,AVG(NetSales)as Avg_NetSales,Min(NetSales)as Min_NetSales,Max(NetSales)as Max_NetSales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+
+select COUNT(*) as Observations,AVG(NetSales)as Avg_NetSales,Min(NetSales)as Min_NetSales,Max(NetSales)as Max_NetSales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+where sample_flag='1'
+
+
+--Missing Sales 
+select COUNT(*) as Missing_Sales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+where netSales is null 
+
+select COUNT(*) as Missing_Sales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+where netSales is null and sample_flag='1'
+
+
+--0 Sales 
+select COUNT(*) as Zero_Sales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+where netSales=0
+
+select COUNT(*) as Zero_Sales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+where netSales=0 and sample_flag='1'
+
+
+--Negative Sales 
+select COUNT(*) as Negative_Sales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+where netSales<0
+
+select COUNT(*) as Negative_Sales
+from  #MidCorp_Sample_all a
+left join RISK_ANALYST_DISTINCT_RATIO b
+on a.entity_ID=b.entity_ID
+and a.Recent_Stmt_Date=b.statementdate
+where netSales<0 and sample_flag='1'
+
+
+
+
+if object_id('tempdb..#YR_EDF2B') is not null drop table #YR_EDF2B
+		SELECT DISTINCT SUB_SEGMENTATION_ALL as YR
+		INTO #YR_EDF2B
+		FROM #MidCorp_Sample_all
+-- 1		
+if object_id('tempdb..#DEFREP_RATIOS2A') is not null drop table #DEFREP_RATIOS2A
+		select SUB_SEGMENTATION_ALL as YR, net_exposure,STANDALONE_PD_PCT, NetSales
+		into #DEFREP_RATIOS2A
+		from  #MidCorp_Sample_all a
+		left join RISK_ANALYST_DISTINCT_RATIO b
+		on a.entity_ID=b.entity_ID
+		and a.Recent_Stmt_Date=b.statementdate
+		
+		--552
+		
+if object_id('tempdb..#DEFREP_RATIOS3') is not null drop table #DEFREP_RATIOS3
+		select SUB_SEGMENTATION_ALL as YR, net_exposure,STANDALONE_PD_PCT, NetSales
+		into #DEFREP_RATIOS3
+		from  #MidCorp_Sample_all a
+		left join RISK_ANALYST_DISTINCT_RATIO b
+		on a.entity_ID=b.entity_ID
+		and a.Recent_Stmt_Date=b.statementdate 
+		where sample_flag='1'
+--123
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--NetSales Percentiles
+
+--all
+	SELECT YR,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 1 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 99 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P1,
+	(	     (SELECT MAX(netSales) FROM
+			 (SELECT TOP 5 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			  WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			 (SELECT TOP 95 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			  WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales DESC) AS H2)
+	) / 2 AS P5,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 10 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 90 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P10,	
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 25 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 75 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P25,
+	(	     (SELECT MAX(netSales) FROM
+			 (SELECT TOP 50 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			  WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			 (SELECT TOP 50 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			  WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales DESC) AS H2)
+	) / 2 AS P50,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 75 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 25 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P75,	
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 90 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 10 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P90,
+	(	     (SELECT MAX(netSales) FROM
+			 (SELECT TOP 95 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			  WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			 (SELECT TOP 5 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			  WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales DESC) AS H2)
+	) / 2 AS P95,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 99 PERCENT netSales FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 1 PERCENT netSales FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P99
+		FROM #YR_EDF2B AS Y
+			order by YR
+			
+--sample
+	SELECT YR,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 1 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 99 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P1,
+	(	     (SELECT MAX(netSales) FROM
+			 (SELECT TOP 5 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			  WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			 (SELECT TOP 95 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			  WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales DESC) AS H2)
+	) / 2 AS P5,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 10 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 90 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P10,	
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 25 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 75 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P25,
+	(	     (SELECT MAX(netSales) FROM
+			 (SELECT TOP 50 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			  WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			 (SELECT TOP 50 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			  WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales DESC) AS H2)
+	) / 2 AS P50,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 75 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 25 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P75,	
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 90 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 10 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P90,
+	(	     (SELECT MAX(netSales) FROM
+			 (SELECT TOP 95 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			  WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			 (SELECT TOP 5 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			  WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			  ORDER BY netSales DESC) AS H2)
+	) / 2 AS P95,
+	(		(SELECT MAX(netSales) FROM
+			(SELECT TOP 99 PERCENT netSales FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales) AS H1)
+		+
+			(SELECT MIN(netSales) FROM
+			(SELECT TOP 1 PERCENT netSales FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND netSales IS NOT NULL
+			 ORDER BY netSales DESC) AS H2)
+	) / 2 AS P99
+			FROM #YR_EDF2B AS Y
+			order by YR			
+			
+			
+-------------------------COMPARE NET Exposure---------------------------------------------------
+--Mean, min, max
+select COUNT(*) as Observations,AVG(net_exposure)as Avg_exposure,Min(net_exposure)as Min_exposure,Max(net_exposure)as Max_exposure
+from  #MidCorp_Sample_all a
+
+select COUNT(*) as Observations,AVG(net_exposure)as Avg_exposure,Min(net_exposure)as Min_exposure,Max(net_exposure)as Max_exposure
+from  #MidCorp_Sample_all a
+where sample_flag='1'
+
+
+--Missing
+select COUNT(*) as Missing_exposure
+from  #MidCorp_Sample_all a
+where net_exposure is null
+
+select COUNT(*) as Missing_exposure
+from  #MidCorp_Sample_all a
+where net_exposure is null and sample_flag='1'
+
+
+--Zero
+select COUNT(*) as Zero_exposure
+from  #MidCorp_Sample_all a
+where net_exposure=0
+
+select COUNT(*) as Zero_exposure
+from  #MidCorp_Sample_all a
+where net_exposure=0 and sample_flag='1'
+
+
+--Negative  
+select COUNT(*) as Negative_exposure
+from  #MidCorp_Sample_all a
+where net_exposure<0
+
+select COUNT(*) as Negative_exposure
+from  #MidCorp_Sample_all a
+where net_exposure<0 and sample_flag='1'
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--CALCULATE Exposure Percentiles
+--all
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P1,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P5,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P10,	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P25,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P50,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P75,	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P90,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P95,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P99
+			FROM #YR_EDF2B AS Y
+			order by YR		
+			
+
+---selected
+	SELECT YR,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P1,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P5,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P10,	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P25,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 50 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P50,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 75 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 25 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P75,	
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 90 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 10 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P90,
+	(	     (SELECT MAX(net_exposure) FROM
+			 (SELECT TOP 95 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			  WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			 (SELECT TOP 5 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			  WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			  ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P95,
+	(		(SELECT MAX(net_exposure) FROM
+			(SELECT TOP 99 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure) AS H1)
+		+
+			(SELECT MIN(net_exposure) FROM
+			(SELECT TOP 1 PERCENT net_exposure FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND net_exposure IS NOT NULL
+			 ORDER BY net_exposure DESC) AS H2)
+	) / 2 AS P99
+			FROM #YR_EDF2B AS Y
+			order by YR	
+
+-------------------------COMPARE RATINGS---------------------------------------------------
+--Mean, min, max
+select COUNT(*) as Observations,AVG(standalone_pd_pct)as Avg_Rating,Min(standalone_pd_pct)as Min_Rating,Max(standalone_pd_pct)as Max_Rating
+from  #MidCorp_Sample_all a
+
+select COUNT(*) as Observations,AVG(standalone_pd_pct)as Avg_Rating,Min(standalone_pd_pct)as Min_Rating,Max(standalone_pd_pct)as Max_Rating
+from  #MidCorp_Sample_all a
+where sample_flag='1'
+
+
+--Missing
+select COUNT(*) as Missing_Rating
+from  #MidCorp_Sample_all a
+where standalone_pd_pct is null
+
+select COUNT(*) as Missing_Rating
+from  #MidCorp_Sample_all a
+where standalone_pd_pct is null and sample_flag='1'
+
+--Zero
+select COUNT(*) as Zero_Rating
+from  #MidCorp_Sample_all a
+where standalone_pd_pct=0 
+
+select COUNT(*) as Zero_Rating
+from  #MidCorp_Sample_all a
+where standalone_pd_pct=0 and sample_flag='1'
+
+
+--Negative  
+select COUNT(*) as Negative_Rating
+from  #MidCorp_Sample_all a
+where standalone_pd_pct<0 
+
+select COUNT(*) as Negative_Rating
+from  #MidCorp_Sample_all a
+where standalone_pd_pct<0 and sample_flag='1'
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--CALCULATE PD Percentiles
+
+--All
+	SELECT YR,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 1 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 99 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P1,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 5 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 95 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P5,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 10 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 90 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P10,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 25 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 75 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P25,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 50 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 50 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P50,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 75 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 25 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P75,
+	(	     (SELECT MAX(standalone_pd_pct) FROM
+			 (SELECT TOP 90 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			  WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			  ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			 (SELECT TOP 10 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			  WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			  ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P90,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 95 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 5 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P95,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 99 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 1 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS2A AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P99
+			FROM #YR_EDF2B AS Y
+			order by YR		
+			
+--Sample
+
+	SELECT YR,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 1 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 99 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P1,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 5 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 95 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P5,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 10 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 90 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P10,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 25 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 75 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P25,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 50 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 50 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P50,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 75 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 25 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P75,
+	(	     (SELECT MAX(standalone_pd_pct) FROM
+			 (SELECT TOP 90 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			  WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			  ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			 (SELECT TOP 10 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			  WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			  ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P90,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 95 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 5 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P95,
+	(		(SELECT MAX(standalone_pd_pct) FROM
+			(SELECT TOP 99 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS A
+			 WHERE A.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct) AS H1)
+		+
+			(SELECT MIN(standalone_pd_pct) FROM
+			(SELECT TOP 1 PERCENT standalone_pd_pct FROM #DEFREP_RATIOS3 AS B
+			 WHERE B.YR = Y.YR
+			 AND standalone_pd_pct IS NOT NULL
+			 ORDER BY standalone_pd_pct DESC) AS H2)
+	) / 2 AS P99
+			FROM #YR_EDF2B AS Y
+			order by YR									
+
+-------------------------------Compare Industry Distribution----------------------------------------
+
+select NAICS_Sector_nm,COUNT(*) as Observations
+from  #MidCorp_Sample_all a
+group by NAICS_Sector_nm
+order by NAICS_Sector_nm
+
+select NAICS_Sector_nm,COUNT(*) as Observations
+from  #MidCorp_Sample_all a
+where sample_flag='1'
+group by NAICS_Sector_nm
+order by NAICS_Sector_nm
+			
+
+
+-------------------Compare ABL/Non-ABL Distribution---------------------------------
+select PORTFOLIO,COUNT(*) as Observations 
+from  #MidCorp_Sample_all
+group by PORTFOLIO
+
+select PORTFOLIO,COUNT(*) as Observations 
+from  #MidCorp_Sample_all
+where sample_flag='1'
+group by PORTFOLIO

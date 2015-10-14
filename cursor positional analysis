@@ -1,0 +1,105 @@
+
+
+if object_id('tempdb..#Temp') is not null  drop table #Temp
+select column_name,DATA_TYPE
+into #Temp from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='AMC_Sample_Data'
+
+select distinct DATA_TYPE from #Temp
+
+---------------------------------------------
+
+if object_id('tempdb..#Temp_1') is not null  drop table #Temp_1
+CREATE TABLE #Temp_1
+(
+Columnname varchar(200),
+Null_Count FLOAT,
+Total_Count FLOAT,
+Zero_Count FLOAT,
+Nagative_value FLOAT, 
+Positive_value FLOAT,
+Maximum_Value FLOAT,
+Minimum_Value FLOAT,
+Standard_Deviation FLOAT,
+Mean FLOAT,
+Median FLOAT
+)
+    
+
+Declare @columnname varchar (200)
+
+DECLARE FETCH_CURSOR CURSOR FOR 
+SELECT column_name
+FROM #Temp 
+where DATA_TYPE in ('float')
+
+
+OPEN FETCH_CURSOR;
+
+FETCH NEXT FROM FETCH_CURSOR 
+INTO @columnname;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+print @columnname
+
+--Total Count,Null Count,Zero Count,Nagative value, Posative value, Standard Deviation,Maximim value,Minimum Value,Mean, Median, Mode
+
+exec('insert into #Temp_1 (Columnname,Null_Count,Total_Count,Zero_Count,
+Nagative_value,Positive_value,Maximum_Value,Minimum_Value,Standard_Deviation,Mean,Median)
+select distinct '''+@columnname+''',COUNT(*),
+(select count(*) from [IDFC_Sample_Data]),
+(select count(*) from [IDFC_Sample_Data] where ['+@columnname+']=0),
+(select count(*) from [IDFC_Sample_Data] where ['+@columnname+']<0),
+(select count(*) from [IDFC_Sample_Data] where ['+@columnname+']>0),
+(select Max(['+@columnname+']) from [IDFC_Sample_Data]),
+(select Min(['+@columnname+']) from [IDFC_Sample_Data]),
+(select Stdev(['+@columnname+']) from [IDFC_Sample_Data]),
+(select Avg(['+@columnname+']) from [IDFC_Sample_Data]),
+(select(	(
+        Select Top 1 ['+@columnname+']
+        From   (
+                Select  Top 50 Percent ['+@columnname+']
+               From    [IDFC_Sample_Data]
+               Where   ['+@columnname+'] Is NOT NULL
+               Order By ['+@columnname+']
+               ) As A
+       Order By ['+@columnname+'] DESC
+      ) 
+      + 
+      (
+		 Select Top 1 ['+@columnname+']
+		 From   (
+				Select  Top 50 Percent ['+@columnname+']
+				From    [IDFC_Sample_Data]
+				Where   ['+@columnname+'] Is NOT NULL
+				Order By ['+@columnname+'] DESC
+				) As A
+      Order By ['+@columnname+'] Asc
+      )
+) / 2)
+from [IDFC_Sample_Data] where ['+@columnname+'] is null')
+
+
+FETCH NEXT FROM FETCH_CURSOR 
+INTO @columnname;
+END
+deallocate FETCH_CURSOR
+
+-------------------------------
+
+
+select Columnname,
+Null_Count,
+Zero_Count,
+Nagative_value ,
+Positive_value,
+Total_Count,
+Mean,
+Median,
+Standard_Deviation,
+Minimum_Value,
+Maximum_Value
+from #Temp_1
+
+--------------------------------

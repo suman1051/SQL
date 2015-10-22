@@ -1,4 +1,4 @@
-
+# delete temp table if exists 
 
 if object_id('tempdb..#Temp') is not null  drop table #Temp
 select column_name,DATA_TYPE
